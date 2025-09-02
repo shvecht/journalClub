@@ -1,0 +1,49 @@
+name: ENT harvest (stage 1–2)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '00 6 1 * *'  # run 03:17 UTC on the 1st of each month
+
+jobs:
+  run-notebook:
+    permissions:
+      contents: write        # needed to commit outputs back
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          pip install papermill nbconvert requests pandas python-dateutil tenacity tqdm
+
+      # Optional: pass a date window from cron; override inside the notebook via os.environ
+      - name: Run articlesRetrieval notebook
+        env:
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb
+
+      - name: Commit outputs
+        run: |
+          git config user.name "ent-bot"
+          git config user.email "ent-bot@users.noreply.github.com"
+          git add ent_raw_results.csv ent_all_results.json ent_curated.csv ent_report.md articlesRetrieval.out.ipynb || true
+          git commit -m "ENT harvest: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || echo "Nothing to commit"
+          git push
+
+      - name: Upload artifacts (backup, even if nothing new to commit)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ent-harvest-${{ github.run_id }}
+          path: |
+            ent_raw_results.csv
+            ent_all_results.json
+            ent_curated.csv
+            ent_report.md
+            articlesRetrieval.out.ipynb
+          if-no-files-found: ignore
