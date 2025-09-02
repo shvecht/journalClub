@@ -19,7 +19,8 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install papermill nbconvert requests pandas python-dateutil tenacity tqdm
+          pip install papermill nbconvert requests pandas python-dateutil tenacity tqdm ipykernel
+          python -m ipykernel install --user --name python3
 
       # Optional: pass a date window from cron; override inside the notebook via os.environ
       - name: Run articlesRetrieval notebook
