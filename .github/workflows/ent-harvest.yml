@@ -31,17 +31,22 @@ jobs:
         run: |
           papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb
 
+      - name: Organize outputs by month
+        run: |
+          OUT_DIR=$(date -u +'%Y/%m')
+          echo "OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
+          mkdir -p "$OUT_DIR"
+          mv ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb "$OUT_DIR/"
+          mv ent_curated.csv ent_report.md "$OUT_DIR/" 2>/dev/null || true
+
       - name: Commit outputs
         run: |
           git config user.name  "ent-bot"
           git config user.email "ent-bot@users.noreply.github.com"
-      
-          # Add files that are always produced
-          git add ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb
-      
-          # Add optional files if they exist
-          git add ent_curated.csv ent_report.md 2>/dev/null || true
-      
+
+          git add "$OUT_DIR"
+          git add -u
+
           git commit -m "ENT harvest: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || echo "Nothing to commit"
           git push
 
@@ -51,9 +56,9 @@ jobs:
         with:
           name: ent-harvest-${{ github.run_id }}
           path: |
-            ent_raw_results.csv
-            ent_all_results.json
-            ent_curated.csv
-            ent_report.md
-            articlesRetrieval.out.ipynb
+            ${{ env.OUT_DIR }}/ent_raw_results.csv
+            ${{ env.OUT_DIR }}/ent_all_results.json
+            ${{ env.OUT_DIR }}/ent_curated.csv
+            ${{ env.OUT_DIR }}/ent_report.md
+            ${{ env.OUT_DIR }}/articlesRetrieval.out.ipynb
           if-no-files-found: ignore
