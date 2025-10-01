@@ -36,8 +36,17 @@ jobs:
           OUT_DIR=$(date -u +'%Y/%m')
           echo "OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
           mkdir -p "$OUT_DIR"
-          mv ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb "$OUT_DIR/"
-          mv ent_curated.csv ent_report.md "$OUT_DIR/" 2>/dev/null || true
+
+          move_if_exists() {
+            for file in "$@"; do
+              if [ -f "$file" ]; then
+                mv "$file" "$OUT_DIR/"
+              fi
+            done
+          }
+
+          move_if_exists ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb
+          move_if_exists ent_curated.csv ent_report.md
 
       - name: Commit outputs
         run: |
