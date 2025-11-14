@@ -365,6 +365,14 @@ function renderCardDeck() {
     const month = formatMonthShort(session.dateObj);
     const year = session.year != null ? String(session.year) : "";
 
+    card.dataset.day = day;
+    card.dataset.month = month;
+    card.dataset.year = year;
+    const ariaBits = [title];
+    if (journal) ariaBits.push(journal);
+    ariaBits.push(`${day} ${month}${year ? ` ${year}` : ""}`.trim());
+    card.setAttribute("aria-label", ariaBits.join(", "));
+
     card.innerHTML = `
       <div class="playing-card-inner">
         <header class="playing-card-header">
