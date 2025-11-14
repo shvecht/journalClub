@@ -16,7 +16,7 @@ def find_latest_ent_file(root: Path) -> Path | None:
             if ent_file.is_file():
                 # Parse year/month into a date for comparison
                 try:
-                    dt = datetime.strptime(f"{year_dir.name}-{month_dir.name}", "%Y-%Y-%m")
+                    dt = datetime.strptime(f"{year_dir.name}-{month_dir.name}", "%Y-%m")
                 except Exception:
                     continue
                 if latest_date is None or dt > latest_date:
