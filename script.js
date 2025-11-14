@@ -7,9 +7,8 @@ let filteredSessions = [];
 let viewMode = "cards";
 
 const state = {
-  year: "all",
+  month: "all",
   journal: "all",
-  presenter: "all",
   search: ""
 };
 
@@ -19,12 +18,10 @@ const timelineViewEl = document.getElementById("timelineView");
 
 const yearFilterEl = document.getElementById("yearFilter");
 const journalFilterEl = document.getElementById("journalFilter");
-const presenterFilterEl = document.getElementById("presenterFilter");
 const searchInputEl = document.getElementById("searchInput");
 
 const statSessionsEl = document.getElementById("statSessions");
 const statJournalsEl = document.getElementById("statJournals");
-const statPresentersEl = document.getElementById("statPresenters");
 const statLatestYearEl = document.getElementById("statLatestYear");
 
 const themeToggleBtn = document.getElementById("themeToggle");
@@ -40,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function attachEventHandlers() {
   if (yearFilterEl) {
     yearFilterEl.addEventListener("change", () => {
-      state.year = yearFilterEl.value;
+      state.month = yearFilterEl.value;
       applyFiltersAndRender();
     });
   }
@@ -48,13 +45,6 @@ function attachEventHandlers() {
   if (journalFilterEl) {
     journalFilterEl.addEventListener("change", () => {
       state.journal = journalFilterEl.value;
-      applyFiltersAndRender();
-    });
-  }
-
-  if (presenterFilterEl) {
-    presenterFilterEl.addEventListener("change", () => {
-      state.presenter = presenterFilterEl.value;
       applyFiltersAndRender();
     });
   }
@@ -151,25 +141,37 @@ function normaliseSessions(raw) {
       const year = Number.isFinite(dateObj.getTime())
         ? dateObj.getFullYear()
         : null;
+      const monthIndex = Number.isFinite(dateObj.getTime())
+        ? dateObj.getMonth()
+        : null;
 
       return {
         ...item,
         dateObj,
-        year
+        year,
+        monthIndex
       };
     })
-    .filter((s) => s.year !== null);
+    .filter((s) => s.year !== null && s.monthIndex !== null);
 }
 
 /* ---------- Filters and search ---------- */
 
 function buildFilterOptions() {
-  const years = Array.from(new Set(sessions.map((s) => s.year))).sort(
-    (a, b) => b - a
-  );
+  const months = Array.from(
+    new Set(
+      sessions
+        .map((s) => s.monthIndex)
+        .filter((m) => m !== null && m !== undefined)
+    )
+  ).sort((a, b) => a - b);
 
-  fillSelect(yearFilterEl, ["all", ...years], (val) =>
-    val === "all" ? "All years" : String(val)
+  fillSelect(yearFilterEl, ["all", ...months], (val) =>
+    val === "all"
+      ? "All months"
+      : new Date(2000, Number(val), 1).toLocaleString(undefined, {
+          month: "long"
+        })
   );
 
   const journals = Array.from(
@@ -178,14 +180,6 @@ function buildFilterOptions() {
 
   fillSelect(journalFilterEl, ["all", ...journals], (val) =>
     val === "all" ? "All journals" : String(val)
-  );
-
-  const presenters = Array.from(
-    new Set(sessions.map((s) => s.presenter).filter(Boolean))
-  ).sort((a, b) => a.localeCompare(b));
-
-  fillSelect(presenterFilterEl, ["all", ...presenters], (val) =>
-    val === "all" ? "All presenters" : String(val)
   );
 }
 
@@ -205,7 +199,10 @@ function fillSelect(selectEl, values, labelFn) {
 
 function applyFiltersAndRender() {
   filteredSessions = sessions.filter((session) => {
-    if (state.year !== "all" && String(session.year) !== state.year) {
+    if (
+      state.month !== "all" &&
+      String(session.monthIndex) !== String(state.month)
+    ) {
       return false;
     }
     if (
@@ -215,19 +212,11 @@ function applyFiltersAndRender() {
     ) {
       return false;
     }
-    if (
-      state.presenter !== "all" &&
-      session.presenter &&
-      session.presenter !== state.presenter
-    ) {
-      return false;
-    }
     if (state.search) {
       const haystack = [
         session.title,
         session.journal,
         session.authors,
-        session.presenter,
         session.notes,
         session.abstract
       ]
@@ -270,7 +259,6 @@ function renderCards() {
     const title = escapeHtml(session.title || "Untitled session");
     const journal = escapeHtml(session.journal || "");
     const authors = escapeHtml(session.authors || "");
-    const presenter = escapeHtml(session.presenter || "TBA");
     const notes = escapeHtml(session.notes || "");
     const abstract = escapeHtml(session.abstract || "");
     const hasBody = Boolean(notes || abstract);
@@ -296,7 +284,6 @@ function renderCards() {
               ? `<p class="session-authors">${authors}</p>`
               : ""
           }
-          <p class="session-presenter">Presenter · ${presenter}</p>
         </div>
       </header>
 
@@ -391,21 +378,19 @@ function renderTimeline() {
 
       const title = escapeHtml(session.title || "Untitled session");
       const journal = escapeHtml(session.journal || "");
-      const presenter = escapeHtml(session.presenter || "TBA");
 
       item.innerHTML = `
         <div class="timeline-dot"></div>
         <div class="timeline-content">
           <div class="timeline-date">${formatDateLong(session.dateObj)}</div>
           <div class="timeline-title">${title}</div>
-          <div class="timeline-sub">
-            ${
-              journal
-                ? `<span>${journal}</span><span>·</span>`
-                : ""
-            }
-            <span>${presenter}</span>
-          </div>
+          ${
+            journal
+              ? `<div class="timeline-sub">
+                  <span>${journal}</span>
+                </div>`
+              : ""
+          }
         </div>
       `;
 
@@ -446,7 +431,6 @@ function updateStats() {
   if (!sessions.length) {
     setCounter(statSessionsEl, 0);
     setCounter(statJournalsEl, 0);
-    setCounter(statPresentersEl, 0);
     if (statLatestYearEl) statLatestYearEl.textContent = "–";
     return;
   }
@@ -455,14 +439,10 @@ function updateStats() {
   const totalJournals = new Set(
     sessions.map((s) => s.journal).filter(Boolean)
   ).size;
-  const totalPresenters = new Set(
-    sessions.map((s) => s.presenter).filter(Boolean)
-  ).size;
   const latestYear = Math.max(...sessions.map((s) => s.year));
 
   animateCounter(statSessionsEl, totalSessions);
   animateCounter(statJournalsEl, totalJournals);
-  animateCounter(statPresentersEl, totalPresenters);
   if (statLatestYearEl) statLatestYearEl.textContent = String(latestYear);
 }
 
