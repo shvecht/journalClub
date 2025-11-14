@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "date": "2025-10-31",
+    "presenter": "Dr Test",
+    "title": "Long COVID Trial Explores Anti-Inflammatory Treatment.",
+    "journal": "JAMA",
+    "pmid": "41171293",
+    "pdf": "https://pubmed.ncbi.nlm.nih.gov/41171293/",
+    "notes": "Testing pipeline with Long COVID trial"
+  }
+]
