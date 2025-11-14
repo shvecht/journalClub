@@ -20,7 +20,20 @@ def main():
     sessions_path = repo_root / "sessions.csv"
     with sessions_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["date", "presenter", "pmid", "notes", "pdf"])
+        writer.writerow(
+            [
+                "date",
+                "presenter",
+                "pmid",
+                "title",
+                "journal",
+                "authors",
+                "doi",
+                "abstract",
+                "notes",
+                "pdf",
+            ]
+        )
         for art in articles:
             pub_date = art.get("Publication_Date", "")
             try:
@@ -28,7 +41,20 @@ def main():
                 iso_date = dt.strftime("%Y-%m-%d")
             except Exception:
                 iso_date = pub_date
-            writer.writerow([iso_date, "", art.get("PMID", ""), "", ""])
+            writer.writerow(
+                [
+                    iso_date,
+                    "",
+                    art.get("PMID", ""),
+                    art.get("Title", ""),
+                    art.get("Journal", ""),
+                    art.get("Authors", ""),
+                    art.get("DOI", ""),
+                    art.get("Abstract", ""),
+                    "",
+                    "",
+                ]
+            )
 
     print(f"Wrote {len(articles)} rows to {sessions_path} from {ent_file}")
 

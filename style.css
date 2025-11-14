@@ -567,6 +567,12 @@ body {
   color: var(--text-soft);
 }
 
+.session-authors {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
 .session-presenter {
   margin: 0.25rem 0 0;
   font-size: 0.8rem;
@@ -582,6 +588,16 @@ body {
 
 .session-notes {
   margin: 0.2rem 0 0.2rem;
+}
+
+.session-abstract {
+  margin: 0.2rem 0 0.2rem;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .session-footer {

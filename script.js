@@ -226,8 +226,10 @@ function applyFiltersAndRender() {
       const haystack = [
         session.title,
         session.journal,
+        session.authors,
         session.presenter,
-        session.notes
+        session.notes,
+        session.abstract
       ]
         .filter(Boolean)
         .join(" ")
@@ -267,8 +269,11 @@ function renderCards() {
 
     const title = escapeHtml(session.title || "Untitled session");
     const journal = escapeHtml(session.journal || "");
+    const authors = escapeHtml(session.authors || "");
     const presenter = escapeHtml(session.presenter || "TBA");
     const notes = escapeHtml(session.notes || "");
+    const abstract = escapeHtml(session.abstract || "");
+    const hasBody = Boolean(notes || abstract);
 
     card.innerHTML = `
       <header class="session-header">
@@ -286,14 +291,28 @@ function renderCards() {
               ? `<p class="session-journal">${journal}</p>`
               : `<p class="session-journal">&nbsp;</p>`
           }
+          ${
+            authors
+              ? `<p class="session-authors">${authors}</p>`
+              : ""
+          }
           <p class="session-presenter">Presenter · ${presenter}</p>
         </div>
       </header>
 
       ${
-        notes
+        hasBody
           ? `<div class="session-body">
-              <p class="session-notes">${notes}</p>
+              ${
+                notes
+                  ? `<p class="session-notes">${notes}</p>`
+                  : ""
+              }
+              ${
+                abstract
+                  ? `<p class="session-abstract">${abstract}</p>`
+                  : ""
+              }
             </div>`
           : ""
       }

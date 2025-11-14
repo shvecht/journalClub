@@ -59,12 +59,27 @@ def main():
 
         date_iso = normalize_date(s.get("date"), art.get("Publication_Date"))
 
+        # Allow curated CSV fields to override extracted metadata when present
+        s_title = (s.get("title") or "").strip()
+        s_journal = (s.get("journal") or "").strip()
+        s_authors = (s.get("authors") or "").strip()
+        s_abstract = (s.get("abstract") or "").strip()
+
+        title = s_title or (art.get("Title", "") or "").strip()
+        journal = s_journal or (art.get("Journal", "") or "").strip()
+        authors = s_authors or (art.get("Authors", "") or "").strip()
+        abstract = s_abstract or (art.get("Abstract", "") or "").strip()
+        doi = (art.get("DOI", "") or "").strip()
+
         out.append(
             {
                 "date": date_iso,
                 "presenter": s.get("presenter", "").strip(),
-                "title": art.get("Title", "").strip(),
-                "journal": art.get("Journal", "").strip(),
+                "title": title,
+                "journal": journal,
+                "authors": authors,
+                "abstract": abstract,
+                "doi": doi,
                 "pmid": pmid,
                 "pdf": (s.get("pdf", "") or f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/").strip(),
                 "notes": s.get("notes", "").strip(),
