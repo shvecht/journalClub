@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <title>Journal Club · ENT · Sleep · Laryngology</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="top-nav">
+      <div class="nav-inner">
+        <div class="brand">
+          <div class="brand-mark">JC</div>
+          <div class="brand-text">
+            <span class="brand-title">Journal Club</span>
+            <span class="brand-subtitle">ENT · Sleep · Laryngology</span>
+          </div>
+        </div>
+
+        <div class="nav-actions">
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Toggle light and dark mode"
+          >
+            <span class="theme-toggle-track">
+              <span class="theme-toggle-icon theme-toggle-icon-sun">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon">🌙</span>
+              <span class="theme-toggle-thumb"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <h1>HYMC / Technion Journal Club</h1>
+          <p>
+            Monthly curated papers in otolaryngology, sleep medicine and laryngology,
+            automatically pulled from our journal selection pipeline.
+          </p>
+        </div>
+
+        <div class="hero-stats" aria-label="Journal club statistics">
+          <div class="stat-card">
+            <span class="stat-label">Sessions</span>
+            <span class="stat-value" id="statSessions">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Journals</span>
+            <span class="stat-value" id="statJournals">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Presenters</span>
+            <span class="stat-value" id="statPresenters">0</span>
+          </div>
+          <div class="stat-card stat-card-subtle">
+            <span class="stat-label">Latest year</span>
+            <span class="stat-value" id="statLatestYear">–</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Filters and search">
+        <div class="filters">
+          <div class="filter-group">
+            <label for="yearFilter" class="filter-label">Year</label>
+            <select id="yearFilter" class="filter-select">
+              <option value="all">All years</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="journalFilter" class="filter-label">Journal</label>
+            <select id="journalFilter" class="filter-select">
+              <option value="all">All journals</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="presenterFilter" class="filter-label">Presenter</label>
+            <select id="presenterFilter" class="filter-select">
+              <option value="all">All presenters</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="controls-bottom">
+          <div class="search-group">
+            <label for="searchInput" class="filter-label">Search</label>
+            <div class="search-input-wrapper">
+              <span class="search-icon">⌕</span>
+              <input
+                id="searchInput"
+                type="search"
+                class="search-input"
+                placeholder="Search title, journal, presenter, notes…"
+                autocomplete="off"
+              >
+            </div>
+          </div>
+
+          <div class="view-toggle" role="tablist" aria-label="View mode">
+            <button
+              type="button"
+              class="view-toggle-btn active"
+              data-view="cards"
+              role="tab"
+              aria-selected="true"
+            >
+              Sessions
+            </button>
+            <button
+              type="button"
+              class="view-toggle-btn"
+              data-view="timeline"
+              role="tab"
+              aria-selected="false"
+            >
+              Timeline
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="sessions" aria-live="polite">
+        <div id="sessionsList" class="sessions-list">
+          <div class="placeholder">
+            <p>Loading sessions…</p>
+          </div>
+        </div>
+
+        <div id="timelineView" class="timeline-view hidden">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <p class="footer-text">
+        Built for the HYMC / Technion Journal Club.
+      </p>
+      <a
+        href="https://github.com/USERNAME/journalClub"
+        class="footer-link"
+        target="_blank"
+        rel="noopener"
+      >
+        View on GitHub
+      </a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
