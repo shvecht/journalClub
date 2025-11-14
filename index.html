@@ -106,11 +106,20 @@
             <button
               type="button"
               class="view-toggle-btn active"
-              data-view="cards"
+              data-view="sessions"
               role="tab"
               aria-selected="true"
             >
               Sessions
+            </button>
+            <button
+              type="button"
+              class="view-toggle-btn"
+              data-view="cards"
+              role="tab"
+              aria-selected="false"
+            >
+              Cards
             </button>
             <button
               type="button"
@@ -130,6 +139,10 @@
           <div class="placeholder">
             <p>Loading sessions…</p>
           </div>
+        </div>
+
+        <div id="cardDeckView" class="card-deck-view hidden">
+          <!-- Populated dynamically -->
         </div>
 
         <div id="timelineView" class="timeline-view hidden">

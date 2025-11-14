@@ -4,7 +4,7 @@ const THEME_STORAGE_KEY = "jc-theme-preference";
 
 let sessions = [];
 let filteredSessions = [];
-let viewMode = "cards";
+let viewMode = "sessions";
 
 const state = {
   month: "all",
@@ -15,6 +15,7 @@ const state = {
 // Cache DOM references
 const sessionsListEl = document.getElementById("sessionsList");
 const timelineViewEl = document.getElementById("timelineView");
+const cardDeckViewEl = document.getElementById("cardDeckView");
 
 const yearFilterEl = document.getElementById("yearFilter");
 const journalFilterEl = document.getElementById("journalFilter");
@@ -232,6 +233,7 @@ function applyFiltersAndRender() {
 
   renderCards();
   renderTimeline();
+  renderCardDeck();
   updateViewVisibility();
 }
 
@@ -336,6 +338,63 @@ function renderCards() {
   });
 }
 
+/* ---------- Rendering: card deck (playing cards) ---------- */
+
+function renderCardDeck() {
+  if (!cardDeckViewEl) return;
+
+  cardDeckViewEl.innerHTML = "";
+
+  if (!filteredSessions.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = "<p>No sessions match your filters yet.</p>";
+    cardDeckViewEl.appendChild(empty);
+    return;
+  }
+
+  filteredSessions.forEach((session, index) => {
+    const card = document.createElement("article");
+    card.className = "playing-card";
+    const delay = Math.min(index * 0.035, 0.35);
+    card.style.animationDelay = delay.toFixed(3) + "s";
+
+    const title = escapeHtml(session.title || "Untitled session");
+    const journal = escapeHtml(session.journal || "");
+    const day = formatDay(session.dateObj);
+    const month = formatMonthShort(session.dateObj);
+    const year = session.year != null ? String(session.year) : "";
+
+    card.innerHTML = `
+      <div class="playing-card-inner">
+        <header class="playing-card-header">
+          <span class="playing-card-date">${day} ${month}</span>
+          <span class="playing-card-year">${year}</span>
+        </header>
+        <div class="playing-card-body">
+          <h2 class="playing-card-title">${title}</h2>
+          ${
+            journal
+              ? `<p class="playing-card-journal">${journal}</p>`
+              : ""
+          }
+        </div>
+        <footer class="playing-card-footer">
+          ${
+            session.pmid
+              ? `<span class="playing-card-meta">PMID ${escapeHtml(
+                  session.pmid
+                )}</span>`
+              : ""
+          }
+        </footer>
+      </div>
+    `;
+
+    cardDeckViewEl.appendChild(card);
+  });
+}
+
 /* ---------- Rendering: timeline ---------- */
 
 function renderTimeline() {
@@ -406,12 +465,20 @@ function renderTimeline() {
 
 function updateViewVisibility() {
   if (!sessionsListEl || !timelineViewEl) return;
+
   if (viewMode === "timeline") {
     sessionsListEl.classList.add("hidden");
+    if (cardDeckViewEl) cardDeckViewEl.classList.add("hidden");
     timelineViewEl.classList.remove("hidden");
+  } else if (viewMode === "cards") {
+    sessionsListEl.classList.add("hidden");
+    timelineViewEl.classList.add("hidden");
+    if (cardDeckViewEl) cardDeckViewEl.classList.remove("hidden");
   } else {
+    // sessions list
     sessionsListEl.classList.remove("hidden");
     timelineViewEl.classList.add("hidden");
+    if (cardDeckViewEl) cardDeckViewEl.classList.add("hidden");
   }
 }
 
