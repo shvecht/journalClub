@@ -4,25 +4,8 @@ from pathlib import Path
 from datetime import datetime
 
 def find_latest_ent_file(root: Path) -> Path | None:
-    """Find the most recent YYYY/MM/ent_all_results.json in the repo."""
-    latest_path = None
-    latest_date = None
-
-    for year_dir in root.glob("20[0-9][0-9]"):
-        if not year_dir.is_dir():
-            continue
-        for month_dir in year_dir.iterdir():
-            ent_file = month_dir / "ent_all_results.json"
-            if ent_file.is_file():
-                # Parse year/month into a date for comparison
-                try:
-                    dt = datetime.strptime(f"{year_dir.name}-{month_dir.name}", "%Y-%m")
-                except Exception:
-                    continue
-                if latest_date is None or dt > latest_date:
-                    latest_date = dt
-                    latest_path = ent_file
-    return latest_path
+    candidates = sorted(root.rglob("ent_all_results.json"))
+    return candidates[-1] if candidates else None
 
 def main():
     repo_root = Path(__file__).parent
