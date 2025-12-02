@@ -499,13 +499,8 @@ body {
   width: 100%;
   max-width: 230px;
   aspect-ratio: 2 / 3;
-  padding: 1.35rem 1.1rem;
   border-radius: 22px;
-  background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.08), transparent 60%),
-    linear-gradient(160deg, #ffffff 0%, #f4f7ff 45%, #ffffff 100%);
-  border: 1.5px solid rgba(15, 23, 42, 0.12);
-  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-  color: #0f172a;
+  perspective: 1200px;
   transform-origin: center;
   opacity: 0;
   animation: fadeInUp 0.35s ease forwards;
@@ -516,8 +511,52 @@ body {
   --card-corner: #dc2626;
 }
 
+.playing-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .playing-card::before,
 .playing-card::after {
+  content: "";
+}
+
+.playing-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s ease;
+}
+
+.playing-card.is-flipped .playing-card-inner {
+  transform: rotateY(180deg);
+}
+
+.playing-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  padding: 1.35rem 1.1rem;
+  border-radius: 22px;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+.playing-card-front {
+  background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.08), transparent 60%),
+    linear-gradient(160deg, #ffffff 0%, #f4f7ff 45%, #ffffff 100%);
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  color: #0f172a;
+}
+
+.playing-card-front::before,
+.playing-card-front::after {
   content: attr(data-day) "\A" attr(data-month);
   white-space: pre;
   position: absolute;
@@ -530,13 +569,13 @@ body {
   pointer-events: none;
 }
 
-.playing-card::before {
+.playing-card-front::before {
   top: 0.75rem;
   left: 0.85rem;
   text-align: left;
 }
 
-.playing-card::after {
+.playing-card-front::after {
   bottom: 0.75rem;
   right: 0.85rem;
   transform: rotate(180deg);
@@ -547,17 +586,6 @@ body {
   transform: translateY(-6px) rotate(-1.5deg);
   box-shadow: 0 30px 48px rgba(15, 23, 42, 0.24);
   border-color: rgba(37, 99, 235, 0.45);
-}
-
-.playing-card-inner {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  height: 100%;
-  gap: 0.65rem;
 }
 
 .playing-card-header {
@@ -631,20 +659,104 @@ body {
   background: rgba(15, 23, 42, 0.06);
 }
 
+.playing-card-back {
+  background: linear-gradient(165deg, #f8fafc 0%, #e2e8f0 60%, #ffffff 100%);
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  color: #0f172a;
+  padding: 1.25rem 1.05rem 1.15rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  transform: rotateY(180deg);
+}
+
+.playing-card-back-header {
+  width: 100%;
+  text-align: left;
+}
+
+.playing-card-back-date {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+  font-size: 0.78rem;
+}
+
+.playing-card-back-journal {
+  margin-top: 0.15rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.playing-card-back-authors {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 0.82rem;
+  color: var(--card-muted);
+}
+
+.playing-card-back-notes,
+.playing-card-back-abstract,
+.playing-card-back-placeholder {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.playing-card-back-notes {
+  font-weight: 600;
+}
+
+.playing-card-back-abstract,
+.playing-card-back-placeholder {
+  color: #111827;
+}
+
+.playing-card-back-placeholder {
+  font-style: italic;
+  color: var(--card-muted);
+}
+
+.playing-card-back-links {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
 :root[data-theme="dark"] .card-deck-view {
   gap: 1.1rem;
 }
 
-:root[data-theme="dark"] .playing-card {
-  background: linear-gradient(150deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%);
+:root[data-theme="dark"] .playing-card-front,
+:root[data-theme="dark"] .playing-card-back {
   border-color: rgba(148, 163, 184, 0.35);
   box-shadow: 0 26px 42px rgba(15, 23, 42, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
 }
 
+:root[data-theme="dark"] .playing-card-front {
+  background: linear-gradient(150deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%);
+}
+
+:root[data-theme="dark"] .playing-card-back {
+  background: linear-gradient(165deg, #0b1221 0%, #0f172a 65%, #0b1221 100%);
+  color: #e5e7eb;
+}
+
 :root[data-theme="dark"] .playing-card-year {
-  border-color: rgba(148, 163, 184, 0.35);
-  background: rgba(148, 163, 184, 0.12);
   color: #1f2937;
+}
+
+:root[data-theme="dark"] .playing-card-back-date,
+:root[data-theme="dark"] .playing-card-back-authors,
+:root[data-theme="dark"] .playing-card-back-placeholder {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .playing-card-back-abstract {
+  color: #e5e7eb;
 }
 
 :root[data-theme="dark"] .playing-card-meta {
