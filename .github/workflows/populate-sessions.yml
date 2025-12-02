@@ -2,10 +2,15 @@ name: Populate sessions
 
 on:
   workflow_dispatch: {}  # allow manual runs
+  workflow_run:
+    workflows: ["ENT harvest (stage 1–2)"]
+    types:
+      - completed
 
 jobs:
   populate:
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: write
     steps:
