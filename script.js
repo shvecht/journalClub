@@ -358,9 +358,15 @@ function renderCardDeck() {
     card.className = "playing-card";
     const delay = Math.min(index * 0.035, 0.35);
     card.style.animationDelay = delay.toFixed(3) + "s";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-pressed", "false");
 
     const title = escapeHtml(session.title || "Untitled session");
     const journal = escapeHtml(session.journal || "");
+    const authors = escapeHtml(session.authors || "");
+    const notes = escapeHtml(session.notes || "");
+    const abstract = escapeHtml(session.abstract || "");
     const day = formatDay(session.dateObj);
     const month = formatMonthShort(session.dateObj);
     const year = session.year != null ? String(session.year) : "";
@@ -375,29 +381,93 @@ function renderCardDeck() {
 
     card.innerHTML = `
       <div class="playing-card-inner">
-        <header class="playing-card-header">
-          <span class="playing-card-date">${day} ${month}</span>
-          <span class="playing-card-year">${year}</span>
-        </header>
-        <div class="playing-card-body">
-          <h2 class="playing-card-title">${title}</h2>
-          ${
-            journal
-              ? `<p class="playing-card-journal">${journal}</p>`
-              : ""
-          }
+        <div class="playing-card-face playing-card-front" data-day="${day}" data-month="${month}">
+          <header class="playing-card-header">
+            <span class="playing-card-date">${day} ${month}</span>
+            <span class="playing-card-year">${year}</span>
+          </header>
+          <div class="playing-card-body">
+            <h2 class="playing-card-title">${title}</h2>
+            ${
+              journal
+                ? `<p class="playing-card-journal">${journal}</p>`
+                : ""
+            }
+          </div>
+          <footer class="playing-card-footer">
+            ${
+              session.pmid
+                ? `<span class="playing-card-meta">PMID ${escapeHtml(
+                    session.pmid
+                  )}</span>`
+                : ""
+            }
+          </footer>
         </div>
-        <footer class="playing-card-footer">
+        <div class="playing-card-face playing-card-back">
+          <div class="playing-card-back-header">
+            <div class="playing-card-back-date">${day} ${month}${
+              year ? ` ${year}` : ""
+            }</div>
+            ${
+              journal
+                ? `<div class="playing-card-back-journal">${journal}</div>`
+                : ""
+            }
+          </div>
           ${
-            session.pmid
-              ? `<span class="playing-card-meta">PMID ${escapeHtml(
-                  session.pmid
-                )}</span>`
+            authors
+              ? `<p class="playing-card-back-authors">${authors}</p>`
               : ""
           }
-        </footer>
+          ${
+            notes
+              ? `<p class="playing-card-back-notes">${notes}</p>`
+              : ""
+          }
+          ${
+            abstract
+              ? `<p class="playing-card-back-abstract">${abstract}</p>`
+              : "<p class=\"playing-card-back-placeholder\">No abstract provided.</p>"
+          }
+          <div class="playing-card-back-links">
+            ${
+              session.pmid
+                ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${encodeURIComponent(
+                    session.pmid
+                  )}/" target="_blank" rel="noopener" class="chip chip-primary">`
+                + `PMID ${escapeHtml(session.pmid)}</a>`
+                : ""
+            }
+            ${
+              session.pdf
+                ? `<a href="${escapeAttr(
+                    session.pdf
+                  )}" target="_blank" rel="noopener" class="chip chip-soft">PDF</a>`
+                : ""
+            }
+          </div>
+        </div>
       </div>
     `;
+
+    const toggleFlip = () => {
+      const isFlipped = card.classList.toggle("is-flipped");
+      card.setAttribute("aria-pressed", String(isFlipped));
+    };
+
+    card.addEventListener("click", (event) => {
+      if (event.target && event.target.closest && event.target.closest("a")) {
+        return;
+      }
+      toggleFlip();
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
 
     cardDeckViewEl.appendChild(card);
   });
