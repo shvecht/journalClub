@@ -519,9 +519,6 @@ body.card-focus-active {
 }
 
 .playing-card {
-  --card-focus-translate-x: 0px;
-  --card-focus-translate-y: 0px;
-  --card-focus-scale: 1;
   position: relative;
   width: 100%;
   max-width: 230px;
@@ -529,10 +526,9 @@ body.card-focus-active {
   border-radius: 22px;
   perspective: 1200px;
   transform-origin: center;
-  transform: translate3d(0, 0, 0) scale(1);
   opacity: 0;
   animation: fadeInUp 0.35s ease forwards;
-  transition: transform 0.3s ease, box-shadow 0.24s ease,
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
     border-color 0.18s ease, background 0.18s ease;
   overflow: hidden;
   --card-muted: #475569;
@@ -540,8 +536,11 @@ body.card-focus-active {
 }
 
 .playing-card.is-focused {
-  transform: translate3d(var(--card-focus-translate-x),
-      var(--card-focus-translate-y), 0) scale(var(--card-focus-scale));
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  max-width: 360px;
+  transform: translate(-50%, -50%) scale(1.12);
   z-index: 90;
   box-shadow: 0 26px 48px rgba(15, 23, 42, 0.4), 0 0 0 2px rgba(37, 99, 235, 0.5);
 }
@@ -621,12 +620,6 @@ body.card-focus-active {
   transform: translateY(-6px) rotate(-1.5deg);
   box-shadow: 0 30px 48px rgba(15, 23, 42, 0.24);
   border-color: rgba(37, 99, 235, 0.45);
-}
-
-.playing-card.is-focused:hover {
-  transform: translate3d(var(--card-focus-translate-x),
-      var(--card-focus-translate-y), 0) scale(var(--card-focus-scale));
-  box-shadow: 0 26px 48px rgba(15, 23, 42, 0.4), 0 0 0 2px rgba(37, 99, 235, 0.5);
 }
 
 .playing-card-header {
