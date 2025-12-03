@@ -92,6 +92,11 @@ function attachEventHandlers() {
   }
 
   window.addEventListener("scroll", handleScroll);
+  window.addEventListener("resize", () => {
+    if (focusedCard) {
+      updateCardFocusTransform(focusedCard);
+    }
+  });
 }
 
 function handleScroll() {
@@ -507,6 +512,7 @@ function enterCardFocus(card) {
     focusedCard.classList.remove("is-focused");
   }
 
+  updateCardFocusTransform(card);
   focusedCard = card;
   card.classList.add("is-focused");
   document.body.classList.add("card-focus-active");
@@ -519,6 +525,9 @@ function enterCardFocus(card) {
 function exitCardFocus() {
   if (focusedCard) {
     focusedCard.classList.remove("is-focused");
+    focusedCard.classList.remove("is-flipped");
+    focusedCard.setAttribute("aria-pressed", "false");
+    resetCardFocusTransform(focusedCard);
     focusedCard = null;
   }
 
@@ -530,6 +539,26 @@ function exitCardFocus() {
       cardFocusOverlay.classList.add("hidden");
     }, 180);
   }
+}
+
+function updateCardFocusTransform(card) {
+  const rect = card.getBoundingClientRect();
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const translateX = centerX - (rect.left + rect.width / 2);
+  const translateY = centerY - (rect.top + rect.height / 2);
+  const targetWidth = Math.min(window.innerWidth * 0.82, 420);
+  const scale = Math.min(1.85, Math.max(1.22, targetWidth / rect.width));
+
+  card.style.setProperty("--card-focus-translate-x", `${translateX}px`);
+  card.style.setProperty("--card-focus-translate-y", `${translateY}px`);
+  card.style.setProperty("--card-focus-scale", scale.toFixed(3));
+}
+
+function resetCardFocusTransform(card) {
+  card.style.removeProperty("--card-focus-translate-x");
+  card.style.removeProperty("--card-focus-translate-y");
+  card.style.removeProperty("--card-focus-scale");
 }
 
 /* ---------- Rendering: timeline ---------- */
