@@ -5,6 +5,8 @@ const THEME_STORAGE_KEY = "jc-theme-preference";
 let sessions = [];
 let filteredSessions = [];
 let viewMode = "sessions";
+let focusedCard = null;
+let cardFocusOverlay = null;
 
 const state = {
   month: "all",
@@ -31,9 +33,24 @@ const viewToggleBtns = document.querySelectorAll(".view-toggle-btn");
 
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
+  initCardFocusOverlay();
   attachEventHandlers();
   loadSessions();
 });
+
+function initCardFocusOverlay() {
+  cardFocusOverlay = document.createElement("div");
+  cardFocusOverlay.className = "card-focus-overlay hidden";
+  cardFocusOverlay.setAttribute("aria-hidden", "true");
+  cardFocusOverlay.addEventListener("click", () => exitCardFocus());
+  document.body.appendChild(cardFocusOverlay);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      exitCardFocus();
+    }
+  });
+}
 
 function attachEventHandlers() {
   if (yearFilterEl) {
@@ -343,6 +360,7 @@ function renderCards() {
 function renderCardDeck() {
   if (!cardDeckViewEl) return;
 
+  exitCardFocus();
   cardDeckViewEl.innerHTML = "";
 
   if (!filteredSessions.length) {
@@ -456,21 +474,62 @@ function renderCardDeck() {
       card.setAttribute("aria-pressed", String(isFlipped));
     };
 
+    const handleCardActivate = () => {
+      toggleFlip();
+      if (focusedCard === card) {
+        exitCardFocus();
+      } else {
+        enterCardFocus(card);
+      }
+    };
+
     card.addEventListener("click", (event) => {
       if (event.target && event.target.closest && event.target.closest("a")) {
         return;
       }
-      toggleFlip();
+      handleCardActivate();
     });
     card.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        toggleFlip();
+        handleCardActivate();
       }
     });
 
     cardDeckViewEl.appendChild(card);
   });
+}
+
+function enterCardFocus(card) {
+  if (!cardFocusOverlay) return;
+
+  if (focusedCard && focusedCard !== card) {
+    focusedCard.classList.remove("is-focused");
+  }
+
+  focusedCard = card;
+  card.classList.add("is-focused");
+  document.body.classList.add("card-focus-active");
+  cardFocusOverlay.classList.remove("hidden");
+  requestAnimationFrame(() => {
+    cardFocusOverlay.classList.add("visible");
+  });
+}
+
+function exitCardFocus() {
+  if (focusedCard) {
+    focusedCard.classList.remove("is-focused");
+    focusedCard = null;
+  }
+
+  document.body.classList.remove("card-focus-active");
+  if (cardFocusOverlay) {
+    cardFocusOverlay.classList.remove("visible");
+    setTimeout(() => {
+      if (!cardFocusOverlay) return;
+      cardFocusOverlay.classList.add("hidden");
+    }, 180);
+  }
 }
 
 /* ---------- Rendering: timeline ---------- */

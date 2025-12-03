@@ -494,6 +494,30 @@ body {
   justify-items: center;
 }
 
+.card-focus-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+  z-index: 80;
+}
+
+.card-focus-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.card-focus-overlay.hidden {
+  display: none;
+}
+
+body.card-focus-active {
+  overflow: hidden;
+}
+
 .playing-card {
   position: relative;
   width: 100%;
@@ -509,6 +533,16 @@ body {
   overflow: hidden;
   --card-muted: #475569;
   --card-corner: #dc2626;
+}
+
+.playing-card.is-focused {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  max-width: 360px;
+  transform: translate(-50%, -50%) scale(1.12);
+  z-index: 90;
+  box-shadow: 0 26px 48px rgba(15, 23, 42, 0.4), 0 0 0 2px rgba(37, 99, 235, 0.5);
 }
 
 .playing-card:focus-visible {
