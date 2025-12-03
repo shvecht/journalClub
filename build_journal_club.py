@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import csv
 from datetime import datetime
+import re
 
 ROOT = Path(__file__).parent
 
@@ -39,6 +40,12 @@ def normalize_date(date_str_from_session, date_str_from_pub):
         # ent format: 2025-Oct-31
         if len(date_str) == 11 and date_str[4] == "-" and date_str[8] == "-":
             dt = datetime.strptime(date_str, "%Y-%b-%d")
+        # month-only: 2025-Oct
+        elif re.fullmatch(r"\d{4}-[A-Za-z]{3}", date_str):
+            dt = datetime.strptime(f"{date_str}-01", "%Y-%b-%d")
+        # month-only numeric: 2025-10
+        elif re.fullmatch(r"\d{4}-\d{2}", date_str):
+            dt = datetime.strptime(f"{date_str}-01", "%Y-%m-%d")
         else:
             dt = datetime.fromisoformat(date_str)
         return dt.date().isoformat()
