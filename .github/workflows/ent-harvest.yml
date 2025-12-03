@@ -9,6 +9,7 @@ jobs:
   run-notebook:
     permissions:
       contents: write        # needed to commit outputs back
+      pull-requests: write   # needed to open PRs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,16 +49,21 @@ jobs:
           move_if_exists ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb
           move_if_exists ent_curated.csv ent_report.md
 
-      - name: Commit outputs
-        run: |
-          git config user.name  "ent-bot"
-          git config user.email "ent-bot@users.noreply.github.com"
-
-          git add "${OUT_DIR}"
-          git add -u
-
-          git commit -m "ENT harvest: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || echo "Nothing to commit"
-          git push
+      - name: Create ENT harvest pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "ENT harvest: ${{ env.OUT_DIR }}"
+          branch: ent-harvest/${{ env.OUT_DIR }}
+          title: "ENT harvest: ${{ env.OUT_DIR }}"
+          body: |
+            Monthly ENT harvest outputs for ${{ env.OUT_DIR }}.
+          add-paths: |
+            ${{ env.OUT_DIR }}/ent_raw_results.csv
+            ${{ env.OUT_DIR }}/ent_all_results.json
+            ${{ env.OUT_DIR }}/ent_curated.csv
+            ${{ env.OUT_DIR }}/ent_report.md
+            ${{ env.OUT_DIR }}/articlesRetrieval.out.ipynb
 
 
       - name: Upload artifacts (backup, even if nothing new to commit)
