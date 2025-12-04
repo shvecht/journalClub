@@ -477,14 +477,16 @@ function renderCardDeck() {
     const toggleFlip = () => {
       const isFlipped = card.classList.toggle("is-flipped");
       card.setAttribute("aria-pressed", String(isFlipped));
+      return isFlipped;
     };
 
     const handleCardActivate = () => {
-      toggleFlip();
-      if (focusedCard === card) {
-        exitCardFocus();
-      } else {
+      const isFlipped = toggleFlip();
+
+      if (isFlipped) {
         enterCardFocus(card);
+      } else {
+        exitCardFocus();
       }
     };
 
