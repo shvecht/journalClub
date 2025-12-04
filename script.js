@@ -474,17 +474,14 @@ function renderCardDeck() {
       </div>
     `;
 
-    const toggleFlip = () => {
+    const handleCardActivate = () => {
       const isFlipped = card.classList.toggle("is-flipped");
       card.setAttribute("aria-pressed", String(isFlipped));
-    };
 
-    const handleCardActivate = () => {
-      toggleFlip();
-      if (focusedCard === card) {
-        exitCardFocus();
-      } else {
+      if (isFlipped) {
         enterCardFocus(card);
+      } else {
+        exitCardFocus();
       }
     };
 
@@ -548,7 +545,7 @@ function updateCardFocusTransform(card) {
   const translateX = centerX - (rect.left + rect.width / 2);
   const translateY = centerY - (rect.top + rect.height / 2);
   const targetWidth = Math.min(window.innerWidth * 0.82, 420);
-  const scale = Math.min(1.85, Math.max(1.22, targetWidth / rect.width));
+  const scale = Math.min(1.9, Math.max(1.35, targetWidth / rect.width));
 
   card.style.setProperty("--card-focus-translate-x", `${translateX}px`);
   card.style.setProperty("--card-focus-translate-y", `${translateY}px`);
