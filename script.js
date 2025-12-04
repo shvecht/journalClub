@@ -474,20 +474,18 @@ function renderCardDeck() {
       </div>
     `;
 
-    const setCardFlipped = (flipped) => {
-      card.classList.toggle("is-flipped", flipped);
-      card.setAttribute("aria-pressed", String(flipped));
-
-      if (flipped) {
-        enterCardFocus(card);
-      } else {
-        exitCardFocus();
-      }
+    const toggleFlip = () => {
+      const isFlipped = card.classList.toggle("is-flipped");
+      card.setAttribute("aria-pressed", String(isFlipped));
     };
 
     const handleCardActivate = () => {
-      const willFlip = !card.classList.contains("is-flipped");
-      setCardFlipped(willFlip);
+      toggleFlip();
+      if (focusedCard === card) {
+        exitCardFocus();
+      } else {
+        enterCardFocus(card);
+      }
     };
 
     card.addEventListener("click", (event) => {
