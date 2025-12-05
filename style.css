@@ -763,6 +763,10 @@ body.card-focus-active {
   text-align: left;
 }
 
+.playing-card-back-abstract {
+  text-align: justify;
+}
+
 .playing-card-back-notes {
   font-weight: 600;
 }
@@ -934,10 +938,7 @@ body.card-focus-active {
   margin: 0.2rem 0 0.2rem;
   font-size: 0.82rem;
   color: var(--text-soft);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  text-align: justify;
 }
 
 .session-footer {
