@@ -617,7 +617,7 @@ body.card-focus-active {
   text-align: left;
 }
 
-.playing-card:hover {
+.playing-card:hover:not(.is-focused) {
   transform: translateY(-6px) rotate(-1.5deg);
   box-shadow: 0 30px 48px rgba(15, 23, 42, 0.24);
   border-color: rgba(37, 99, 235, 0.45);
