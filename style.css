@@ -530,8 +530,8 @@ body.card-focus-active {
   perspective: 1200px;
   transform-origin: center;
   transform: translate3d(0, 0, 0) scale(1);
-  opacity: 0;
-  animation: fadeInUp 0.35s ease forwards;
+  opacity: 1;
+  animation: fadeInUp 0.35s ease;
   transition: transform 0.3s ease, box-shadow 0.24s ease,
     border-color 0.18s ease, background 0.18s ease;
   overflow: hidden;
