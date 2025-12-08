@@ -32,6 +32,13 @@ def load_sessions():
             sessions.append(row)
     return sessions
 
+
+def parse_subjects(subjects_field):
+    """Parse a comma-separated subjects string into a clean list."""
+    if not subjects_field:
+        return []
+    return [part.strip() for part in subjects_field.split(";") for part in part.split(",") if part.strip()]
+
 def normalize_date(date_str_from_session, date_str_from_pub):
     date_str = (date_str_from_session or date_str_from_pub or "").strip()
     if not date_str:
@@ -71,6 +78,7 @@ def main():
         s_journal = (s.get("journal") or "").strip()
         s_authors = (s.get("authors") or "").strip()
         s_abstract = (s.get("abstract") or "").strip()
+        subjects = parse_subjects(s.get("subjects"))
 
         title = s_title or (art.get("Title", "") or "").strip()
         journal = s_journal or (art.get("Journal", "") or "").strip()
@@ -90,6 +98,7 @@ def main():
                 "pmid": pmid,
                 "pdf": (s.get("pdf", "") or f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/").strip(),
                 "notes": s.get("notes", "").strip(),
+                "subjects": subjects,
             }
         )
 

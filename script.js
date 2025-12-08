@@ -11,6 +11,7 @@ let cardFocusOverlay = null;
 const state = {
   month: "all",
   journal: "all",
+  subject: "all",
   search: ""
 };
 
@@ -21,6 +22,7 @@ const cardDeckViewEl = document.getElementById("cardDeckView");
 
 const yearFilterEl = document.getElementById("yearFilter");
 const journalFilterEl = document.getElementById("journalFilter");
+const subjectFilterEl = document.getElementById("subjectFilter");
 const searchInputEl = document.getElementById("searchInput");
 
 const statSessionsEl = document.getElementById("statSessions");
@@ -63,6 +65,13 @@ function attachEventHandlers() {
   if (journalFilterEl) {
     journalFilterEl.addEventListener("change", () => {
       state.journal = journalFilterEl.value;
+      applyFiltersAndRender();
+    });
+  }
+
+  if (subjectFilterEl) {
+    subjectFilterEl.addEventListener("change", () => {
+      state.subject = subjectFilterEl.value;
       applyFiltersAndRender();
     });
   }
@@ -168,11 +177,18 @@ function normaliseSessions(raw) {
         ? dateObj.getMonth()
         : null;
 
+      const subjects = Array.isArray(item.subjects)
+        ? item.subjects.map((s) => String(s).trim()).filter(Boolean)
+        : typeof item.subjects === "string"
+          ? item.subjects.split(",").map((s) => s.trim()).filter(Boolean)
+          : [];
+
       return {
         ...item,
         dateObj,
         year,
-        monthIndex
+        monthIndex,
+        subjects
       };
     })
     .filter((s) => s.year !== null && s.monthIndex !== null);
@@ -203,6 +219,18 @@ function buildFilterOptions() {
 
   fillSelect(journalFilterEl, ["all", ...journals], (val) =>
     val === "all" ? "All journals" : String(val)
+  );
+
+  const subjects = Array.from(
+    new Set(
+      sessions
+        .flatMap((s) => Array.isArray(s.subjects) ? s.subjects : [])
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  fillSelect(subjectFilterEl, ["all", ...subjects], (val) =>
+    val === "all" ? "All subjects" : String(val)
   );
 }
 
@@ -235,13 +263,20 @@ function applyFiltersAndRender() {
     ) {
       return false;
     }
+    if (
+      state.subject !== "all" &&
+      (!session.subjects || !session.subjects.includes(state.subject))
+    ) {
+      return false;
+    }
     if (state.search) {
       const haystack = [
         session.title,
         session.journal,
         session.authors,
         session.notes,
-        session.abstract
+        session.abstract,
+        Array.isArray(session.subjects) ? session.subjects.join(" ") : ""
       ]
         .filter(Boolean)
         .join(" ")
@@ -286,6 +321,7 @@ function renderCards() {
     const notes = escapeHtml(session.notes || "");
     const abstract = escapeHtml(session.abstract || "");
     const hasBody = Boolean(notes || abstract);
+    const subjectsMarkup = renderSubjectChips(session.subjects);
 
     card.innerHTML = `
       <header class="session-header">
@@ -303,6 +339,7 @@ function renderCards() {
               ? `<p class="session-journal">${journal}</p>`
               : `<p class="session-journal">&nbsp;</p>`
           }
+          ${subjectsMarkup}
           ${
             authors
               ? `<p class="session-authors">${authors}</p>`
@@ -416,6 +453,7 @@ function renderCardDeck() {
                 ? `<p class="playing-card-journal">${journal}</p>`
                 : ""
             }
+            ${subjectsMarkup}
           </div>
           <footer class="playing-card-footer">
             ${
@@ -453,6 +491,7 @@ function renderCardDeck() {
               ? `<p class="playing-card-back-abstract">${abstract}</p>`
               : "<p class=\"playing-card-back-placeholder\">No abstract provided.</p>"
           }
+          ${subjectsMarkup}
           <div class="playing-card-back-links">
             ${
               session.pmid
@@ -603,6 +642,7 @@ function renderTimeline() {
 
       const title = escapeHtml(session.title || "Untitled session");
       const journal = escapeHtml(session.journal || "");
+      const subjectsMarkup = renderSubjectChips(session.subjects, "timeline-subjects");
 
       item.innerHTML = `
         <div class="timeline-dot"></div>
@@ -616,6 +656,7 @@ function renderTimeline() {
                 </div>`
               : ""
           }
+          ${subjectsMarkup}
         </div>
       `;
 
@@ -710,6 +751,26 @@ function easeOutQuad(t) {
 }
 
 /* ---------- Utilities ---------- */
+
+function renderSubjectChips(subjects, className = "subject-chips") {
+  const list = Array.isArray(subjects)
+    ? subjects.filter(Boolean)
+    : [];
+
+  if (!list.length) return "";
+
+  const classes = ["subject-chips", className]
+    .filter(Boolean)
+    .join(" ");
+
+  return `
+    <div class="${classes}" aria-label="Subjects">
+      ${list
+        .map((subject) => `<span class="chip chip-ghost">${escapeHtml(subject)}</span>`)
+        .join("")}
+    </div>
+  `;
+}
 
 function formatDay(date) {
   if (!(date instanceof Date)) return "";
