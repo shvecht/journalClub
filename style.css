@@ -472,6 +472,116 @@ body {
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
 }
 
+/* ---------- Monthly summary ---------- */
+
+.monthly-summary {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-subtle);
+  padding: 1.1rem 1.25rem 1.2rem;
+  margin-bottom: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.summary-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-softer);
+}
+
+.summary-month {
+  margin: 0;
+  font-size: 1.3rem;
+  letter-spacing: 0.01em;
+}
+
+.summary-headline {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+  color: var(--text-soft);
+}
+
+.summary-archive {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 220px;
+}
+
+.summary-archive-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-softer);
+}
+
+.summary-archive-select {
+  appearance: none;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(to bottom, var(--bg-elevated), var(--bg-elevated-soft));
+  color: var(--text);
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+.summary-body {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.8fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .summary-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.summary-paragraph {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.summary-paragraph.summary-text-muted {
+  color: var(--text-softer);
+  font-style: italic;
+}
+
+.summary-highlights {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text);
+}
+
+.summary-highlights li {
+  line-height: 1.45;
+}
+
+.summary-empty {
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  background: var(--bg-elevated-soft);
+  color: var(--text-softer);
+}
+
 /* ---------- Sessions list ---------- */
 
 .sessions {

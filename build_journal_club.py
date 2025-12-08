@@ -95,6 +95,42 @@ def parse_subjects(subjects_field):
         return []
     return [part.strip() for part in subjects_field.split(";") for part in part.split(",") if part.strip()]
 
+
+def parse_highlights(highlights_field):
+    """Parse a highlights string or list into a clean list."""
+    if not highlights_field:
+        return []
+
+    if isinstance(highlights_field, list):
+        raw_items = highlights_field
+    else:
+        text = str(highlights_field).strip()
+        if not text:
+            return []
+        raw_items = re.split(r"[;\n]+", text)
+
+    return [item.strip() for item in raw_items if str(item).strip()]
+
+
+def normalize_month(month_field, date_iso=""):
+    """Return a YYYY-MM string derived from a month field or a full date."""
+    raw_month = (month_field or "").strip()
+    if not raw_month and date_iso:
+        return date_iso[:7]
+
+    try:
+        if re.fullmatch(r"\d{4}-[A-Za-z]{3}", raw_month):
+            dt = datetime.strptime(f"{raw_month}-01", "%Y-%b-%d")
+        elif re.fullmatch(r"\d{4}-\d{2}", raw_month):
+            dt = datetime.strptime(f"{raw_month}-01", "%Y-%m-%d")
+        else:
+            dt = datetime.fromisoformat(raw_month)
+        return dt.strftime("%Y-%m")
+    except Exception:
+        if raw_month:
+            return raw_month[:7]
+        return ""
+
 def normalize_date(date_str_from_session, date_str_from_pub):
     date_str = (date_str_from_session or date_str_from_pub or "").strip()
     if not date_str:
@@ -119,6 +155,7 @@ def main():
     ent_index = load_ent_index()
     sessions = load_sessions()
     out = []
+    monthly_summaries = {}
 
     for s in sessions:
         pmid = str(s.get("pmid", "")).strip()
@@ -164,14 +201,43 @@ def main():
             }
         )
 
+        summary_month = normalize_month(s.get("summary_month"), date_iso)
+        summary_headline = (s.get("summary_headline") or "").strip()
+        summary_paragraph = (s.get("summary_paragraph") or "").strip()
+        summary_highlights = parse_highlights(s.get("summary_highlights"))
+
+        if summary_month and (
+            summary_headline or summary_paragraph or summary_highlights
+        ):
+            monthly_summaries.setdefault(
+                summary_month,
+                {
+                    "month": summary_month,
+                    "headline": summary_headline,
+                    "paragraph": summary_paragraph,
+                    "key_highlights": summary_highlights,
+                },
+            )
+
     # newest first
     out.sort(key=lambda r: r["date"], reverse=True)
 
     data_dir = ROOT / "data"
     data_dir.mkdir(exist_ok=True)
     out_file = data_dir / "journal_club.json"
-    out_file.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"Wrote {len(out)} sessions to {out_file}")
+    payload = {
+        "sessions": out,
+        "monthly_summaries": [
+            monthly_summaries[m]
+            for m in sorted(monthly_summaries.keys(), reverse=True)
+        ],
+    }
+    out_file.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    print(
+        f"Wrote {len(out)} sessions and {len(payload['monthly_summaries'])} summaries to {out_file}"
+    )
 
 if __name__ == "__main__":
     main()
