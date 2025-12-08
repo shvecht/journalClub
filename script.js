@@ -430,6 +430,7 @@ function renderCardDeck() {
     const day = formatDay(session.dateObj);
     const month = formatMonthShort(session.dateObj);
     const year = session.year != null ? String(session.year) : "";
+    const subjectsMarkup = renderSubjectChips(session.subjects);
 
     card.dataset.day = day;
     card.dataset.month = month;
