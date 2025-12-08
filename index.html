@@ -141,6 +141,31 @@
         </div>
       </section>
 
+      <section class="monthly-summary" id="summarySection" aria-live="polite">
+        <div class="summary-header">
+          <div>
+            <p class="summary-label">Monthly summary</p>
+            <h2 class="summary-month" id="summaryMonth">Latest</h2>
+            <p class="summary-headline" id="summaryHeadline"></p>
+          </div>
+          <div class="summary-archive">
+            <label for="summaryArchive" class="summary-archive-label">Archive</label>
+            <select id="summaryArchive" class="summary-archive-select" aria-label="Monthly summary archive">
+              <option value="">No summaries yet</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="summary-body" id="summaryBody">
+          <p class="summary-paragraph" id="summaryParagraph"></p>
+          <ul class="summary-highlights" id="summaryHighlights"></ul>
+        </div>
+
+        <div class="summary-empty" id="summaryEmpty">
+          <p>No monthly summary is available yet. Fresh recaps will appear once they are curated.</p>
+        </div>
+      </section>
+
       <section class="sessions" aria-live="polite">
         <div id="sessionsList" class="sessions-list">
           <div class="placeholder">

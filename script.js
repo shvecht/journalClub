@@ -5,6 +5,8 @@ const THEME_STORAGE_KEY = "jc-theme-preference";
 let sessions = [];
 let filteredSessions = [];
 let viewMode = "sessions";
+let monthlySummaries = [];
+let currentSummaryMonth = null;
 let focusedCard = null;
 let cardFocusOverlay = null;
 
@@ -24,6 +26,15 @@ const yearFilterEl = document.getElementById("yearFilter");
 const journalFilterEl = document.getElementById("journalFilter");
 const subjectFilterEl = document.getElementById("subjectFilter");
 const searchInputEl = document.getElementById("searchInput");
+
+const summarySectionEl = document.getElementById("summarySection");
+const summaryMonthEl = document.getElementById("summaryMonth");
+const summaryHeadlineEl = document.getElementById("summaryHeadline");
+const summaryParagraphEl = document.getElementById("summaryParagraph");
+const summaryHighlightsEl = document.getElementById("summaryHighlights");
+const summaryArchiveSelectEl = document.getElementById("summaryArchive");
+const summaryEmptyEl = document.getElementById("summaryEmpty");
+const summaryBodyEl = document.getElementById("summaryBody");
 
 const statSessionsEl = document.getElementById("statSessions");
 const statJournalsEl = document.getElementById("statJournals");
@@ -81,6 +92,15 @@ function attachEventHandlers() {
       const q = searchInputEl.value.trim().toLowerCase();
       state.search = q;
       applyFiltersAndRender();
+    });
+  }
+
+  if (summaryArchiveSelectEl) {
+    summaryArchiveSelectEl.addEventListener("change", () => {
+      const selected = summaryArchiveSelectEl.value;
+      if (selected) {
+        renderMonthlySummary(selected);
+      }
     });
   }
 
@@ -144,6 +164,25 @@ function toggleTheme() {
 
 /* ---------- Data loading ---------- */
 
+function normaliseDataPayload(raw) {
+  if (Array.isArray(raw)) {
+    return { sessions: raw, monthlySummaries: [] };
+  }
+
+  if (raw && typeof raw === "object") {
+    return {
+      sessions: Array.isArray(raw.sessions) ? raw.sessions : [],
+      monthlySummaries: Array.isArray(raw.monthly_summaries)
+        ? raw.monthly_summaries
+        : Array.isArray(raw.summaries)
+          ? raw.summaries
+          : [],
+    };
+  }
+
+  return { sessions: [], monthlySummaries: [] };
+}
+
 async function loadSessions() {
   if (!sessionsListEl) return;
 
@@ -153,11 +192,24 @@ async function loadSessions() {
       throw new Error("Unable to load journal club data");
     }
     const data = await res.json();
-    sessions = normaliseSessions(data);
+    const payload = normaliseDataPayload(data);
+
+    sessions = normaliseSessions(payload.sessions);
+    monthlySummaries = normaliseSummaries(payload.monthlySummaries);
+    monthlySummaries.sort((a, b) => {
+      if (a.monthDate && b.monthDate) {
+        return b.monthDate - a.monthDate;
+      }
+      if (a.monthDate) return -1;
+      if (b.monthDate) return 1;
+      return 0;
+    });
+    currentSummaryMonth = null;
     sessions.sort((a, b) => b.dateObj - a.dateObj);
 
     buildFilterOptions();
     updateStats();
+    renderMonthlySummary();
     applyFiltersAndRender();
   } catch (err) {
     showError(err);
@@ -200,6 +252,34 @@ function normaliseSessions(raw) {
       };
     })
     .filter((s) => s.year !== null && s.monthIndex !== null);
+}
+
+function normaliseSummaries(raw) {
+  if (!Array.isArray(raw)) return [];
+
+  return raw
+    .map((item) => {
+      const monthStr = typeof item.month === "string" ? item.month.trim() : "";
+      const monthDate = parseMonthDate(monthStr);
+      const headline = typeof item.headline === "string"
+        ? item.headline.trim()
+        : "";
+      const paragraph = typeof item.paragraph === "string"
+        ? item.paragraph.trim()
+        : "";
+      const highlights = normaliseHighlights(item.key_highlights || item.highlights);
+
+      if (!monthDate && !monthStr) return null;
+
+      return {
+        month: formatMonthKey(monthDate, monthStr),
+        monthDate,
+        headline,
+        paragraph,
+        highlights,
+      };
+    })
+    .filter(Boolean);
 }
 
 /* ---------- Filters and search ---------- */
@@ -300,6 +380,72 @@ function applyFiltersAndRender() {
   renderTimeline();
   renderCardDeck();
   updateViewVisibility();
+}
+
+/* ---------- Monthly summary ---------- */
+
+function renderMonthlySummary(requestedMonth) {
+  if (!summarySectionEl) return;
+
+  if (!monthlySummaries.length) {
+    if (summaryArchiveSelectEl) {
+      summaryArchiveSelectEl.innerHTML = "<option value=\"\">No summaries yet</option>";
+      summaryArchiveSelectEl.disabled = true;
+    }
+    if (summaryBodyEl) summaryBodyEl.classList.add("hidden");
+    if (summaryEmptyEl) summaryEmptyEl.classList.remove("hidden");
+    return;
+  }
+
+  const selectedSummary = requestedMonth
+    ? monthlySummaries.find((s) => s.month === requestedMonth)
+    : monthlySummaries[0];
+
+  const summary = selectedSummary || monthlySummaries[0];
+  currentSummaryMonth = summary ? summary.month : null;
+
+  if (summaryArchiveSelectEl) {
+    buildSummaryArchiveOptions(currentSummaryMonth);
+    summaryArchiveSelectEl.disabled = monthlySummaries.length <= 1;
+  }
+
+  if (summaryEmptyEl) summaryEmptyEl.classList.add("hidden");
+  if (summaryBodyEl) summaryBodyEl.classList.remove("hidden");
+
+  const monthLabel = formatMonthLabel(summary?.monthDate) || summary?.month || "Latest";
+  if (summaryMonthEl) summaryMonthEl.textContent = monthLabel;
+  if (summaryHeadlineEl) summaryHeadlineEl.textContent = summary?.headline || "Monthly highlights";
+  if (summaryParagraphEl) {
+    summaryParagraphEl.textContent = summary?.paragraph
+      ? summary.paragraph
+      : "A curated overview for this month will appear here once available.";
+    summaryParagraphEl.classList.toggle("summary-text-muted", !summary?.paragraph);
+  }
+
+  if (summaryHighlightsEl) {
+    summaryHighlightsEl.innerHTML = "";
+    const highlights = (summary && summary.highlights && summary.highlights.length)
+      ? summary.highlights
+      : ["Key highlights will be added when this recap is finalized."];
+    highlights.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      summaryHighlightsEl.appendChild(li);
+    });
+  }
+}
+
+function buildSummaryArchiveOptions(selectedMonth) {
+  if (!summaryArchiveSelectEl) return;
+  summaryArchiveSelectEl.innerHTML = "";
+
+  monthlySummaries.forEach((summary, index) => {
+    const opt = document.createElement("option");
+    opt.value = summary.month;
+    opt.textContent = formatMonthLabel(summary.monthDate) || summary.month || `Summary ${index + 1}`;
+    opt.selected = summary.month === selectedMonth || (!selectedMonth && index === 0);
+    summaryArchiveSelectEl.appendChild(opt);
+  });
 }
 
 /* ---------- Rendering: cards ---------- */
@@ -774,6 +920,57 @@ function easeOutQuad(t) {
 }
 
 /* ---------- Utilities ---------- */
+
+function parseMonthDate(monthStr) {
+  const trimmed = (monthStr || "").trim();
+  if (!trimmed) return null;
+
+  const isoLike = /^\d{4}-\d{2}$/;
+  const shortMonth = /^\d{4}-[A-Za-z]{3}$/;
+
+  if (isoLike.test(trimmed)) {
+    const [year, month] = trimmed.split("-").map((part) => Number(part));
+    const d = new Date(Date.UTC(year, month - 1, 1, 12));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  if (shortMonth.test(trimmed)) {
+    const d = new Date(`${trimmed}-01T12:00:00Z`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(trimmed);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatMonthKey(dateObj, fallback = "") {
+  if (dateObj instanceof Date && !Number.isNaN(dateObj.getTime())) {
+    const year = dateObj.getUTCFullYear();
+    const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+  }
+  return fallback;
+}
+
+function formatMonthLabel(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return "";
+  return dateObj.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
+function normaliseHighlights(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+
+  const text = String(raw).trim();
+  if (!text) return [];
+
+  return text
+    .split(/[;\n]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
 
 function normaliseImages(raw) {
   if (!raw) return [];
