@@ -957,6 +957,14 @@ body.card-focus-active {
   gap: 0.4rem;
 }
 
+.subject-chips,
+.timeline-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -994,6 +1002,17 @@ body.card-focus-active {
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
 }
 
+.chip-ghost {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-soft);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.chip-ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(148, 163, 184, 0.3);
+}
+
 .session-tag {
   padding: 0.18rem 0.5rem;
   border-radius: var(--radius-pill);
@@ -1019,6 +1038,10 @@ body.card-focus-active {
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-soft);
+}
+
+.timeline-subjects {
+  margin-top: 0.3rem;
 }
 
 .timeline-year::before {
