@@ -183,12 +183,20 @@ function normaliseSessions(raw) {
           ? item.subjects.split(",").map((s) => s.trim()).filter(Boolean)
           : [];
 
+      const images = normaliseImages(item.images);
+      const analysis = typeof item.analysis === "string"
+        ? item.analysis.trim()
+        : "";
+
       return {
         ...item,
         dateObj,
         year,
         monthIndex,
-        subjects
+        subjects,
+        highlight: Boolean(item.highlight),
+        analysis,
+        images
       };
     })
     .filter((s) => s.year !== null && s.monthIndex !== null);
@@ -311,7 +319,7 @@ function renderCards() {
 
   filteredSessions.forEach((session, index) => {
     const card = document.createElement("article");
-    card.className = "session-card";
+    card.className = "session-card" + (session.highlight ? " session-card--highlight" : "");
     const delay = Math.min(index * 0.035, 0.35);
     card.style.animationDelay = delay.toFixed(3) + "s";
 
@@ -320,8 +328,11 @@ function renderCards() {
     const authors = escapeHtml(session.authors || "");
     const notes = escapeHtml(session.notes || "");
     const abstract = escapeHtml(session.abstract || "");
-    const hasBody = Boolean(notes || abstract);
+    const analysisMarkup = renderAnalysisDetails(session.analysis);
+    const galleryMarkup = renderImageGallery(session.images);
+    const hasBody = Boolean(notes || abstract || session.analysis || galleryMarkup);
     const subjectsMarkup = renderSubjectChips(session.subjects);
+    const highlightBadge = renderHighlightBadge(session.highlight);
 
     card.innerHTML = `
       <header class="session-header">
@@ -333,7 +344,10 @@ function renderCards() {
           <span class="session-date-year">${session.year}</span>
         </div>
         <div class="session-meta">
-          <h2 class="session-title">${title}</h2>
+          <div class="session-title-row">
+            <h2 class="session-title">${title}</h2>
+            ${highlightBadge}
+          </div>
           ${
             journal
               ? `<p class="session-journal">${journal}</p>`
@@ -361,6 +375,8 @@ function renderCards() {
                   ? `<p class="session-abstract">${abstract}</p>`
                   : ""
               }
+              ${analysisMarkup}
+              ${galleryMarkup}
             </div>`
           : ""
       }
@@ -415,7 +431,7 @@ function renderCardDeck() {
 
   filteredSessions.forEach((session, index) => {
     const card = document.createElement("article");
-    card.className = "playing-card";
+    card.className = "playing-card" + (session.highlight ? " playing-card--highlight" : "");
     const delay = Math.min(index * 0.035, 0.35);
     card.style.animationDelay = delay.toFixed(3) + "s";
     card.setAttribute("role", "button");
@@ -427,10 +443,13 @@ function renderCardDeck() {
     const authors = escapeHtml(session.authors || "");
     const notes = escapeHtml(session.notes || "");
     const abstract = escapeHtml(session.abstract || "");
+    const analysisMarkup = renderAnalysisDetails(session.analysis);
+    const galleryMarkup = renderImageGallery(session.images);
     const day = formatDay(session.dateObj);
     const month = formatMonthShort(session.dateObj);
     const year = session.year != null ? String(session.year) : "";
     const subjectsMarkup = renderSubjectChips(session.subjects);
+    const highlightBadge = renderHighlightBadge(session.highlight);
 
     card.dataset.day = day;
     card.dataset.month = month;
@@ -448,6 +467,7 @@ function renderCardDeck() {
             <span class="playing-card-year">${year}</span>
           </header>
           <div class="playing-card-body">
+            ${highlightBadge ? `<div class="playing-card-highlight">${highlightBadge}</div>` : ""}
             <h2 class="playing-card-title">${title}</h2>
             ${
               journal
@@ -492,6 +512,8 @@ function renderCardDeck() {
               ? `<p class="playing-card-back-abstract">${abstract}</p>`
               : "<p class=\"playing-card-back-placeholder\">No abstract provided.</p>"
           }
+          ${analysisMarkup}
+          ${galleryMarkup}
           ${subjectsMarkup}
           <div class="playing-card-back-links">
             ${
@@ -752,6 +774,80 @@ function easeOutQuad(t) {
 }
 
 /* ---------- Utilities ---------- */
+
+function normaliseImages(raw) {
+  if (!raw) return [];
+
+  const list = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? (() => {
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          return [];
+        }
+      })()
+      : [];
+
+  return list
+    .map((img) => {
+      if (!img) return null;
+      if (typeof img === "string") {
+        const url = img.trim();
+        return url ? { url, caption: "" } : null;
+      }
+
+      const url = img.url || img.src;
+      if (!url) return null;
+      return {
+        url: String(url).trim(),
+        caption: img.caption ? String(img.caption).trim() : ""
+      };
+    })
+    .filter((img) => img && img.url);
+}
+
+function renderHighlightBadge(isHighlighted) {
+  if (!isHighlighted) return "";
+  return `<span class="highlight-badge" aria-label="Highlighted paper">★ Highlight</span>`;
+}
+
+function renderAnalysisDetails(analysisText) {
+  if (!analysisText) return "";
+  return `
+    <details class="analysis-details">
+      <summary aria-label="Toggle analysis">Analysis</summary>
+      <div class="analysis-body">
+        <p>${escapeHtml(analysisText)}</p>
+      </div>
+    </details>
+  `;
+}
+
+function renderImageGallery(images) {
+  if (!Array.isArray(images) || !images.length) return "";
+
+  const items = images
+    .map((img, index) => {
+      const url = escapeAttr(img.url || "");
+      if (!url) return "";
+      const caption = escapeHtml(img.caption || "");
+      const altText = escapeAttr(caption || `Session image ${index + 1}`);
+      return `
+        <figure class="session-image">
+          <img src="${url}" loading="lazy" alt="${altText}" />
+          ${caption ? `<figcaption>${caption}</figcaption>` : ""}
+        </figure>
+      `;
+    })
+    .filter(Boolean)
+    .join("");
+
+  if (!items) return "";
+  return `<div class="session-gallery" aria-label="Session images">${items}</div>`;
+}
 
 function renderSubjectChips(subjects, className = "subject-chips") {
   const list = Array.isArray(subjects)

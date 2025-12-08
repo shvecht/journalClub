@@ -33,6 +33,62 @@ def load_sessions():
     return sessions
 
 
+def parse_bool(val):
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return False
+    return str(val).strip().lower() in {"1", "true", "yes", "y", "highlight", "t"}
+
+
+def parse_images(field):
+    images = []
+    if not field:
+        return images
+
+    def normalise_image(img):
+        if isinstance(img, str):
+            url = img.strip()
+            if url:
+                return {"url": url, "caption": ""}
+            return None
+        if isinstance(img, dict):
+            url = str(img.get("url") or img.get("src") or "").strip()
+            caption = str(img.get("caption") or img.get("alt") or "").strip()
+            if url:
+                return {"url": url, "caption": caption}
+        return None
+
+    raw_list = None
+    if isinstance(field, list):
+        raw_list = field
+    else:
+        text = str(field).strip()
+        if not text:
+            return images
+        try:
+            parsed = json.loads(text)
+            raw_list = parsed if isinstance(parsed, list) else [parsed]
+        except Exception:
+            entries = [part.strip() for part in re.split(r"[;\n]+", text) if part.strip()]
+            raw_list = []
+            for entry in entries:
+                if "|" in entry:
+                    url, caption = entry.split("|", 1)
+                elif "," in entry:
+                    url, caption = entry.split(",", 1)
+                else:
+                    url, caption = entry, ""
+                raw_list.append({"url": url.strip(), "caption": caption.strip()})
+
+    for img in raw_list or []:
+        normalised = normalise_image(img)
+        if normalised:
+            images.append(normalised)
+
+    return images
+
+
 def parse_subjects(subjects_field):
     """Parse a comma-separated subjects string into a clean list."""
     if not subjects_field:
@@ -85,6 +141,9 @@ def main():
         authors = s_authors or (art.get("Authors", "") or "").strip()
         abstract = s_abstract or (art.get("Abstract", "") or "").strip()
         doi = (art.get("DOI", "") or "").strip()
+        highlight = parse_bool(s.get("highlight"))
+        analysis = (s.get("analysis") or "").strip()
+        images = parse_images(s.get("images"))
 
         out.append(
             {
@@ -99,6 +158,9 @@ def main():
                 "pdf": (s.get("pdf", "") or f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/").strip(),
                 "notes": s.get("notes", "").strip(),
                 "subjects": subjects,
+                "highlight": highlight,
+                "analysis": analysis,
+                "images": images,
             }
         )
 
