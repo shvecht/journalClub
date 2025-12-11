@@ -1,0 +1,53 @@
+{
+  "2025-09": {
+    "Laryngology & Voice": 183,
+    "General ENT/Other": 162,
+    "Otology & Neurotology": 133,
+    "Rhinology & Allergy": 98,
+    "Head & Neck Oncology": 58,
+    "Facial Plastics & Reconstruction": 36,
+    "Airway & Trachea": 28,
+    "Pediatrics": 23,
+    "Infectious Disease": 21,
+    "Sleep Medicine": 17,
+    "Trauma": 17,
+    "Skull Base & Cranial": 13,
+    "Audiology & Hearing Science": 12,
+    "Salivary & Oral Cavity": 11,
+    "Endocrine (Thyroid/Parathyroid)": 9
+  },
+  "2025-10": {
+    "Laryngology & Voice": 211,
+    "Otology & Neurotology": 127,
+    "Rhinology & Allergy": 126,
+    "General ENT/Other": 101,
+    "Head & Neck Oncology": 52,
+    "Airway & Trachea": 31,
+    "Pediatrics": 29,
+    "Facial Plastics & Reconstruction": 26,
+    "Sleep Medicine": 17,
+    "Infectious Disease": 16,
+    "Trauma": 14,
+    "Salivary & Oral Cavity": 13,
+    "Endocrine (Thyroid/Parathyroid)": 11,
+    "Audiology & Hearing Science": 11,
+    "Skull Base & Cranial": 7
+  },
+  "2025-11": {
+    "Laryngology & Voice": 206,
+    "General ENT/Other": 157,
+    "Otology & Neurotology": 129,
+    "Rhinology & Allergy": 126,
+    "Head & Neck Oncology": 60,
+    "Pediatrics": 26,
+    "Facial Plastics & Reconstruction": 24,
+    "Airway & Trachea": 21,
+    "Sleep Medicine": 19,
+    "Salivary & Oral Cavity": 15,
+    "Endocrine (Thyroid/Parathyroid)": 14,
+    "Trauma": 13,
+    "Infectious Disease": 12,
+    "Audiology & Hearing Science": 12,
+    "Skull Base & Cranial": 8
+  }
+}
