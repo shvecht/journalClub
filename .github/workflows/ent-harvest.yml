@@ -55,12 +55,21 @@ jobs:
             touch "$OUT_DIR/.gitkeep"
           fi
 
+      - name: Ensure ENT_HARVEST_TOKEN is provided
+        env:
+          ENT_HARVEST_TOKEN: ${{ secrets.ENT_HARVEST_TOKEN }}
+        run: |
+          if [ -z "$ENT_HARVEST_TOKEN" ]; then
+            echo "::error::ENT_HARVEST_TOKEN secret is required to create pull requests."
+            exit 1
+          fi
+
       - name: Create ENT harvest pull request
         id: cpr
         continue-on-error: true
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.ENT_HARVEST_TOKEN != '' && secrets.ENT_HARVEST_TOKEN || github.token }}
+          token: ${{ secrets.ENT_HARVEST_TOKEN }}
           commit-message: "ENT harvest: ${{ env.OUT_DIR }}"
           branch: ent-harvest/${{ env.OUT_DIR }}
           title: "ENT harvest: ${{ env.OUT_DIR }}"
