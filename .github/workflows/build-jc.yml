@@ -1,6 +1,9 @@
 name: Build journal club data
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: "0 5 1 * *"
   workflow_dispatch:
@@ -8,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
     permissions:
       contents: write
     steps:

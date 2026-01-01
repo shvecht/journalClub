@@ -2,6 +2,9 @@ name: Populate sessions
 
 on:
   workflow_dispatch: {}  # allow manual runs
+  push:
+    branches:
+      - 'ent-harvest/**'
   workflow_run:
     workflows: ["ENT harvest (stage 1–2)"]
     types:
@@ -19,6 +22,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_run" ]; then
             echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
             echo "branch=main" >> $GITHUB_OUTPUT
           fi
@@ -28,16 +33,32 @@ jobs:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
 
+      - name: Verify fresh harvest data is present
+        id: harvest-check
+        run: |
+          HARVEST_FILE=$(rg --files -g "ent_all_results.json" | head -n 1 || true)
+
+          if [ -z "$HARVEST_FILE" ]; then
+            echo "::notice::No ent_all_results.json files found on ${{ steps.branch.outputs.branch }}; skipping population."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Found harvest data at $HARVEST_FILE"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Run populate_sessions.py and rebuild data
+        if: steps.harvest-check.outputs.found == 'true'
         run: |
           python populate_sessions.py
           python build_journal_club.py
 
       - name: Commit updated sessions.csv
+        if: steps.harvest-check.outputs.found == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
