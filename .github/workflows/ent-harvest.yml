@@ -55,13 +55,18 @@ jobs:
             touch "$OUT_DIR/.gitkeep"
           fi
 
-      - name: Ensure ENT_HARVEST_TOKEN is provided
+      - name: Select token for pull requests
+        id: select-token
         env:
           ENT_HARVEST_TOKEN: ${{ secrets.ENT_HARVEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$ENT_HARVEST_TOKEN" ]; then
-            echo "::error::ENT_HARVEST_TOKEN secret is required to create pull requests."
-            exit 1
+          if [ -n "$ENT_HARVEST_TOKEN" ]; then
+            echo "token=$ENT_HARVEST_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "Using ENT_HARVEST_TOKEN for pull request creation."
+          else
+            echo "token=$GITHUB_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "::notice::ENT_HARVEST_TOKEN not provided; falling back to GITHUB_TOKEN. Ensure repository settings allow GitHub Actions to create pull requests."
           fi
 
       - name: Create ENT harvest pull request
@@ -69,7 +74,7 @@ jobs:
         continue-on-error: true
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.ENT_HARVEST_TOKEN }}
+          token: ${{ steps.select-token.outputs.token }}
           commit-message: "ENT harvest: ${{ env.OUT_DIR }}"
           branch: ent-harvest/${{ env.OUT_DIR }}
           title: "ENT harvest: ${{ env.OUT_DIR }}"
