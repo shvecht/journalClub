@@ -56,9 +56,11 @@ jobs:
           fi
 
       - name: Create ENT harvest pull request
+        id: cpr
+        continue-on-error: true
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ENT_HARVEST_TOKEN != '' && secrets.ENT_HARVEST_TOKEN || github.token }}
           commit-message: "ENT harvest: ${{ env.OUT_DIR }}"
           branch: ent-harvest/${{ env.OUT_DIR }}
           title: "ENT harvest: ${{ env.OUT_DIR }}"
@@ -66,6 +68,11 @@ jobs:
             Monthly ENT harvest outputs for ${{ env.OUT_DIR }}.
           add-paths: |
             ${{ env.OUT_DIR }}/
+
+      - name: Warn when pull request creation fails
+        if: steps.cpr.outcome == 'failure'
+        run: |
+          echo "::warning::Unable to create PR automatically. Ensure the repository allows GitHub Actions to open pull requests or provide an ENT_HARVEST_TOKEN secret with pull_request scope."
 
 
       - name: Upload artifacts (backup, even if nothing new to commit)
