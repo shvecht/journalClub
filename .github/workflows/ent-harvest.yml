@@ -63,25 +63,78 @@ jobs:
         run: |
           if [ -n "$ENT_HARVEST_TOKEN" ]; then
             echo "token=$ENT_HARVEST_TOKEN" >> "$GITHUB_OUTPUT"
-            echo "Using ENT_HARVEST_TOKEN for pull request creation."
+            echo "target_branch=main" >> "$GITHUB_OUTPUT"
+            echo "create_pr=false" >> "$GITHUB_OUTPUT"
+            echo "Using ENT_HARVEST_TOKEN for direct pushes to main."
           else
             echo "token=$GITHUB_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "target_branch=ent-harvest/${{ env.OUT_DIR }}" >> "$GITHUB_OUTPUT"
+            echo "create_pr=true" >> "$GITHUB_OUTPUT"
             echo "::notice::ENT_HARVEST_TOKEN not provided; falling back to GITHUB_TOKEN. Ensure repository settings allow GitHub Actions to create pull requests."
           fi
 
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push directly to main when permitted
+        id: direct-push
+        if: steps.select-token.outputs.create_pr == 'false'
+        env:
+          TOKEN: ${{ steps.select-token.outputs.token }}
+          TARGET_BRANCH: ${{ steps.select-token.outputs.target_branch }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
+
+          git add "$OUT_DIR"
+
+          if git diff --cached --quiet; then
+            echo "No harvest outputs to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "ENT harvest: $OUT_DIR"
+          git push "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
       - name: Create ENT harvest pull request
         id: cpr
+        if: steps.select-token.outputs.create_pr == 'true'
         continue-on-error: true
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.select-token.outputs.token }}
           commit-message: "ENT harvest: ${{ env.OUT_DIR }}"
-          branch: ent-harvest/${{ env.OUT_DIR }}
+          branch: ${{ steps.select-token.outputs.target_branch }}
           title: "ENT harvest: ${{ env.OUT_DIR }}"
           body: |
             Monthly ENT harvest outputs for ${{ env.OUT_DIR }}.
           add-paths: |
             ${{ env.OUT_DIR }}/
+
+      - name: Push harvest branch when PR creation fails
+        if: steps.select-token.outputs.create_pr == 'true' && steps.cpr.outcome == 'failure'
+        env:
+          TOKEN: ${{ steps.select-token.outputs.token }}
+          TARGET_BRANCH: ${{ steps.select-token.outputs.target_branch }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
+
+          git add "$OUT_DIR"
+
+          if git diff --cached --quiet; then
+            echo "::warning::No harvest outputs found to push after PR failure."
+            exit 0
+          fi
+
+          git commit -m "ENT harvest: $OUT_DIR"
+          git push --force-with-lease "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
 
       - name: Warn when pull request creation fails
         if: steps.cpr.outcome == 'failure'
