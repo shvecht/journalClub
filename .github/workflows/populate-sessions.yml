@@ -14,19 +14,33 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Determine target branch
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=main" >> $GITHUB_OUTPUT
+          fi
+
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.branch.outputs.branch }}
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Run populate_sessions.py
-        run: python populate_sessions.py
+      - name: Run populate_sessions.py and rebuild data
+        run: |
+          python populate_sessions.py
+          python build_journal_club.py
 
       - name: Commit updated sessions.csv
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add sessions.csv
+          git add sessions.csv data/journal_club.json
           git commit -m "Auto-populate sessions.csv from latest ent_all_results" || exit 0
-          git push
+          git push origin HEAD:${{ steps.branch.outputs.branch }}
