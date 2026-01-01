@@ -49,6 +49,12 @@ jobs:
           move_if_exists ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb
           move_if_exists ent_curated.csv ent_report.md
 
+          # Ensure the target directory exists so create-pull-request can add it
+          # even when no outputs were produced.
+          if [ -z "$(ls -A "$OUT_DIR")" ]; then
+            touch "$OUT_DIR/.gitkeep"
+          fi
+
       - name: Create ENT harvest pull request
         uses: peter-evans/create-pull-request@v6
         with:
@@ -59,11 +65,7 @@ jobs:
           body: |
             Monthly ENT harvest outputs for ${{ env.OUT_DIR }}.
           add-paths: |
-            ${{ env.OUT_DIR }}/ent_raw_results.csv
-            ${{ env.OUT_DIR }}/ent_all_results.json
-            ${{ env.OUT_DIR }}/ent_curated.csv
-            ${{ env.OUT_DIR }}/ent_report.md
-            ${{ env.OUT_DIR }}/articlesRetrieval.out.ipynb
+            ${{ env.OUT_DIR }}/
 
 
       - name: Upload artifacts (backup, even if nothing new to commit)
