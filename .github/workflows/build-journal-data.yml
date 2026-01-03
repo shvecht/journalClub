@@ -3,8 +3,9 @@ name: Build journal club data
 on:
   push:
     branches:
+  
       - main
-
+ workflow_dispatch:
 permissions:
   contents: write
 
