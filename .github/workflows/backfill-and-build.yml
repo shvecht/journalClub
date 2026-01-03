@@ -1,0 +1,173 @@
+name: Backfill harvest and build
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_month:
+        description: "Target month to harvest in YYYY-MM format"
+        required: false
+        type: string
+      year:
+        description: "Target calendar year (e.g., 2024)"
+        required: false
+        type: string
+      month:
+        description: "Target calendar month number (1-12)"
+        required: false
+        type: string
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine target month directory
+        id: target-dir
+        run: |
+          if [ -n "${{ inputs.target_month }}" ]; then
+            OUT_DIR=$(echo "${{ inputs.target_month }}" | sed 's/-/\//')
+          else
+            OUT_DIR=$(date -u -d '1 month ago' +'%Y/%m')
+          fi
+
+          echo "Using OUT_DIR=$OUT_DIR"
+          echo "OUT_DIR=$OUT_DIR" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          pip install papermill nbconvert requests pandas python-dateutil tenacity tqdm ipykernel
+
+      - name: Install Python kernel
+        run: python -m ipykernel install --user
+
+      - name: Run articlesRetrieval notebook
+        env:
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+          TARGET_MONTH: ${{ inputs.target_month }}
+          TARGET_YEAR: ${{ inputs.year }}
+          TARGET_MONTH_NUMBER: ${{ inputs.month }}
+        run: |
+          papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb \
+            -p TARGET_MONTH "$TARGET_MONTH" \
+            -p TARGET_YEAR "$TARGET_YEAR" \
+            -p TARGET_MONTH_NUMBER "$TARGET_MONTH_NUMBER"
+
+      - name: Organize outputs by month
+        run: |
+          SOURCE_DIR="data/ent_search"
+          OUT_DIR="${OUT_DIR}"
+          mkdir -p "$OUT_DIR"
+
+          shopt -s nullglob
+          move_if_exists() {
+            for file in "$@"; do
+              if [ -f "$file" ]; then
+                mv "$file" "$OUT_DIR/"
+              fi
+            done
+          }
+
+          move_if_exists "$SOURCE_DIR"/ent_raw_results_*.csv "$SOURCE_DIR"/ent_all_results.json "$SOURCE_DIR"/ent_curated.csv "$SOURCE_DIR"/ent_report.md
+          move_if_exists articlesRetrieval.out.ipynb
+          shopt -u nullglob
+
+          if [ -z "$(find "$OUT_DIR" -mindepth 1 -maxdepth 1 ! -name '.gitkeep' -print -quit)" ]; then
+            touch "$OUT_DIR/.gitkeep"
+          else
+            rm -f "$OUT_DIR/.gitkeep"
+          fi
+
+      - name: Verify harvest data exists
+        id: harvest-check
+        run: |
+          if [ -f "$OUT_DIR/ent_all_results.json" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No ent_all_results.json found in $OUT_DIR after harvest."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run populate_sessions.py and rebuild data
+        if: steps.harvest-check.outputs.found == 'true'
+        run: |
+          python populate_sessions.py
+          python build_journal_club.py
+
+      - name: Select token for pull requests
+        id: select-token
+        env:
+          ENT_HARVEST_TOKEN: ${{ secrets.ENT_HARVEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "$ENT_HARVEST_TOKEN" ]; then
+            echo "token=$ENT_HARVEST_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "Using ENT_HARVEST_TOKEN for pushes."
+          else
+            echo "token=$GITHUB_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "::notice::ENT_HARVEST_TOKEN not provided; using GITHUB_TOKEN for backfill pushes."
+          fi
+
+      - name: Determine backfill branch
+        id: branch-name
+        run: |
+          echo "branch=backfill/${OUT_DIR}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit backfill artifacts
+        if: steps.harvest-check.outputs.found == 'true'
+        id: commit-backfill
+        env:
+          TOKEN: ${{ steps.select-token.outputs.token }}
+          TARGET_BRANCH: ${{ steps.branch-name.outputs.branch }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
+
+          git add -A "$OUT_DIR" sessions.csv data/journal_club.json
+
+          if git diff --cached --quiet; then
+            echo "No backfill artifacts to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "Backfill harvest for $OUT_DIR"
+          git push "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create backfill pull request
+        if: steps.commit-backfill.outputs.pushed == 'true'
+        continue-on-error: true
+        id: create-backfill-pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.select-token.outputs.token }}
+          base: main
+          branch: ${{ steps.branch-name.outputs.branch }}
+          commit-message: "Backfill harvest for ${{ env.OUT_DIR }}"
+          title: "Backfill: ${{ env.OUT_DIR }}"
+          body: |
+            Backfill ENT harvest and regenerated data for ${{ env.OUT_DIR }}.
+          add-paths: |
+            ${{ env.OUT_DIR }}/
+            sessions.csv
+            data/journal_club.json
+
+      - name: Warn when pull request creation fails
+        if: steps.commit-backfill.outputs.pushed == 'true' && steps.create-backfill-pr.outcome == 'failure'
+        run: |
+          echo "::warning::Unable to create PR automatically. Ensure repository allows GitHub Actions to open pull requests or provide an ENT_HARVEST_TOKEN secret with pull_request scope."
