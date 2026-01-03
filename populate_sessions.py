@@ -58,7 +58,9 @@ def build_session_row(pmid: str, art: dict | None, manual: dict | None) -> list:
     art = art or {}
     manual = manual or {}
 
-    date_str = manual.get("date") or art.get("Publication_Date", "")
+    # PublicationDate is used in newer harvests; keep Publication_Date for
+    # older runs so both formats remain compatible.
+    date_str = manual.get("date") or art.get("Publication_Date", art.get("PublicationDate", ""))
     title = manual.get("title") or art.get("Title", "")
     journal = manual.get("journal") or art.get("Journal", "")
     authors = manual.get("authors") or art.get("Authors", "")
