@@ -1,7 +1,20 @@
 name: ENT harvest (stage 1–2)
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      target_month:
+        description: "Target month to harvest in YYYY-MM format"
+        required: false
+        type: string
+      year:
+        description: "Target calendar year (e.g., 2024)"
+        required: false
+        type: string
+      month:
+        description: "Target calendar month number (1-12)"
+        required: false
+        type: string
   schedule:
     - cron: '00 6 1 * *'  # run 03:17 UTC on the 1st of each month
 
@@ -29,8 +42,14 @@ jobs:
       - name: Run articlesRetrieval notebook
         env:
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+          TARGET_MONTH: ${{ github.event.inputs.target_month }}
+          TARGET_YEAR: ${{ github.event.inputs.year }}
+          TARGET_MONTH_NUMBER: ${{ github.event.inputs.month }}
         run: |
-          papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb
+          papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb \
+            -p TARGET_MONTH "${{ env.TARGET_MONTH }}" \
+            -p TARGET_YEAR "${{ env.TARGET_YEAR }}" \
+            -p TARGET_MONTH_NUMBER "${{ env.TARGET_MONTH_NUMBER }}"
 
       - name: Organize outputs by month
         run: |
