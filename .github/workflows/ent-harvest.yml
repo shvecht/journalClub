@@ -35,9 +35,11 @@ jobs:
       - name: Organize outputs by month
         run: |
           OUT_DIR=$(date -u -d '1 month ago' +'%Y/%m')
+          SOURCE_DIR="data/ent_search"
           echo "OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
           mkdir -p "$OUT_DIR"
 
+          shopt -s nullglob
           move_if_exists() {
             for file in "$@"; do
               if [ -f "$file" ]; then
@@ -46,13 +48,15 @@ jobs:
             done
           }
 
-          move_if_exists ent_raw_results.csv ent_all_results.json articlesRetrieval.out.ipynb
-          move_if_exists ent_curated.csv ent_report.md
+          move_if_exists "$SOURCE_DIR"/ent_raw_results_*.csv "$SOURCE_DIR"/ent_all_results.json "$SOURCE_DIR"/ent_curated.csv "$SOURCE_DIR"/ent_report.md
+          move_if_exists articlesRetrieval.out.ipynb
+          shopt -u nullglob
 
-          # Ensure the target directory exists so create-pull-request can add it
-          # even when no outputs were produced.
-          if [ -z "$(ls -A "$OUT_DIR")" ]; then
+          # Keep .gitkeep only when the run produced no outputs
+          if [ -z "$(find "$OUT_DIR" -mindepth 1 -maxdepth 1 ! -name '.gitkeep' -print -quit)" ]; then
             touch "$OUT_DIR/.gitkeep"
+          else
+            rm -f "$OUT_DIR/.gitkeep"
           fi
 
       - name: Select token for pull requests
@@ -89,7 +93,7 @@ jobs:
           git fetch origin "$DEFAULT_BRANCH"
           git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
 
-          git add "$OUT_DIR"
+          git add -A "$OUT_DIR"
 
           if git diff --cached --quiet; then
             echo "No harvest outputs to commit."
@@ -126,7 +130,7 @@ jobs:
           git fetch origin "$DEFAULT_BRANCH"
           git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
 
-          git add "$OUT_DIR"
+          git add -A "$OUT_DIR"
 
           if git diff --cached --quiet; then
             echo "::warning::No harvest outputs found to push after PR failure."
@@ -147,7 +151,7 @@ jobs:
         with:
           name: ent-harvest-${{ github.run_id }}
           path: |
-            ${{ env.OUT_DIR }}/ent_raw_results.csv
+            ${{ env.OUT_DIR }}/ent_raw_results*.csv
             ${{ env.OUT_DIR }}/ent_all_results.json
             ${{ env.OUT_DIR }}/ent_curated.csv
             ${{ env.OUT_DIR }}/ent_report.md
