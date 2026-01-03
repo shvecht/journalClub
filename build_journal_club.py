@@ -164,7 +164,8 @@ def main():
             print(f"WARNING: PMID {pmid} from sessions.csv not found in any ent_all_results.json")
             continue
 
-        date_iso = normalize_date(s.get("date"), art.get("Publication_Date"))
+        pub_date = art.get("Publication_Date") or art.get("PublicationDate")
+        date_iso = normalize_date(s.get("date"), pub_date)
 
         # Allow curated CSV fields to override extracted metadata when present
         s_title = (s.get("title") or "").strip()
