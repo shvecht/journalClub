@@ -153,7 +153,10 @@ PEDIATRIC_PATTERN = re.compile(r"\b(pediatric|child|children|infant|neonate|adol
 
 def load_sessions():
     with DATA_PATH.open() as f:
-        return json.load(f)["sessions"]
+        payload = json.load(f)
+    sessions = payload.get("sessions", [])
+    monthly_summaries = payload.get("monthly_summaries", [])
+    return sessions, monthly_summaries
 
 
 def assign_subjects(text: str) -> List[str]:
@@ -183,8 +186,11 @@ def update_sessions(sessions):
         session["subjects"] = assign_subjects(text)
 
 
-def write_output(sessions):
-    data = {"sessions": sessions}
+def write_output(sessions, monthly_summaries):
+    data = {
+        "sessions": sessions,
+        "monthly_summaries": monthly_summaries,
+    }
     with DATA_PATH.open("w") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         f.write("\n")
@@ -203,9 +209,9 @@ def write_output(sessions):
 
 
 def main():
-    sessions = load_sessions()
+    sessions, monthly_summaries = load_sessions()
     update_sessions(sessions)
-    write_output(sessions)
+    write_output(sessions, monthly_summaries)
 
 
 if __name__ == "__main__":

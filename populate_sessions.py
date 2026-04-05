@@ -1,7 +1,34 @@
+from __future__ import annotations
+
 import csv
 import json
+import re
 from datetime import datetime
 from pathlib import Path
+
+from tag_subjects import assign_subjects
+
+
+CANONICAL_COLUMNS = [
+    "date",
+    "presenter",
+    "pmid",
+    "title",
+    "journal",
+    "authors",
+    "doi",
+    "abstract",
+    "notes",
+    "pdf",
+    "subjects",
+    "highlight",
+    "analysis",
+    "images",
+    "summary_month",
+    "summary_headline",
+    "summary_paragraph",
+    "summary_highlights",
+]
 
 
 def load_ent_index(root: Path) -> dict[str, dict]:
@@ -22,20 +49,54 @@ def load_ent_index(root: Path) -> dict[str, dict]:
     return index
 
 
-def load_manual_sessions(sessions_path: Path) -> dict[str, dict]:
-    """Load existing sessions.csv and index by PMID."""
+def load_existing_sessions(
+    sessions_path: Path,
+) -> tuple[list[str], dict[str, dict[str, str]], list[dict[str, str]]]:
+    """Load existing sessions.csv, preserving field order and unknown columns."""
 
     if not sessions_path.is_file():
-        return {}
+        return CANONICAL_COLUMNS.copy(), {}, []
 
-    manual: dict[str, dict] = {}
+    fieldnames: list[str] = []
+    manual: dict[str, dict[str, str]] = {}
+    orphans: list[dict[str, str]] = []
     with sessions_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
+        fieldnames = [name for name in (reader.fieldnames or []) if name]
         for row in reader:
-            pmid = str(row.get("pmid", "")).strip()
+            cleaned_row = {
+                str(key).strip(): (value or "")
+                for key, value in row.items()
+                if key
+            }
+            pmid = str(cleaned_row.get("pmid", "")).strip()
             if pmid:
-                manual[pmid] = row
-    return manual
+                manual[pmid] = cleaned_row
+            elif any(str(value).strip() for value in cleaned_row.values()):
+                orphans.append(cleaned_row)
+
+    if not fieldnames:
+        fieldnames = CANONICAL_COLUMNS.copy()
+
+    return fieldnames, manual, orphans
+
+
+def merge_fieldnames(existing_fieldnames: list[str]) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for field in [*existing_fieldnames, *CANONICAL_COLUMNS]:
+        if field and field not in seen:
+            merged.append(field)
+            seen.add(field)
+    return merged
+
+
+def first_nonempty(*values: object) -> str:
+    for value in values:
+        text = str(value or "").strip()
+        if text:
+            return text
+    return ""
 
 
 def normalize_date(date_str: str) -> str:
@@ -44,80 +105,119 @@ def normalize_date(date_str: str) -> str:
     date_str = (date_str or "").strip()
     if not date_str:
         return ""
-    try:
-        dt = datetime.strptime(date_str, "%Y-%b-%d")
-    except Exception:
+
+    known_formats = (
+        "%Y-%b-%d",
+        "%Y-%b",
+        "%Y-%m-%d",
+        "%Y-%m",
+    )
+    for fmt in known_formats:
         try:
-            dt = datetime.fromisoformat(date_str)
-        except Exception:
+            return datetime.strptime(date_str, fmt).date().isoformat()
+        except ValueError:
+            continue
+
+    try:
+        return datetime.fromisoformat(date_str).date().isoformat()
+    except ValueError:
+        pass
+
+    month_match = re.fullmatch(r"(\d{4})-([A-Za-z]{3})", date_str)
+    if month_match:
+        try:
+            return datetime.strptime(date_str, "%Y-%b").date().isoformat()
+        except ValueError:
             return date_str
-    return dt.date().isoformat()
+
+    return date_str
 
 
-def build_session_row(pmid: str, art: dict | None, manual: dict | None) -> list:
+def infer_subjects(title: str, journal: str, abstract: str, notes: str) -> str:
+    text = " ".join(part for part in [title, journal, abstract, notes] if part)
+    if not text.strip():
+        return ""
+    return "; ".join(assign_subjects(text))
+
+
+def build_session_row(
+    pmid: str,
+    art: dict | None,
+    manual: dict[str, str] | None,
+    fieldnames: list[str],
+) -> dict[str, str]:
     art = art or {}
     manual = manual or {}
 
-    # PublicationDate is used in newer harvests; keep Publication_Date for
-    # older runs so both formats remain compatible.
-    date_str = manual.get("date") or art.get("Publication_Date", art.get("PublicationDate", ""))
-    title = manual.get("title") or art.get("Title", "")
-    journal = manual.get("journal") or art.get("Journal", "")
-    authors = manual.get("authors") or art.get("Authors", "")
-    doi = manual.get("doi") or art.get("DOI", "")
-    abstract = manual.get("abstract") or art.get("Abstract", "")
-    pdf = manual.get("pdf", "") or (f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else "")
+    row = {field: manual.get(field, "") for field in fieldnames}
 
-    return [
-        normalize_date(date_str),
-        manual.get("presenter", ""),
-        pmid,
-        title,
-        journal,
-        authors,
-        doi,
-        abstract,
-        manual.get("notes", ""),
-        pdf,
-    ]
+    publication_date = art.get("Publication_Date", art.get("PublicationDate", ""))
+    title = first_nonempty(manual.get("title"), art.get("Title"))
+    journal = first_nonempty(manual.get("journal"), art.get("Journal"))
+    authors = first_nonempty(manual.get("authors"), art.get("Authors"))
+    doi = first_nonempty(manual.get("doi"), art.get("DOI"))
+    abstract = first_nonempty(manual.get("abstract"), art.get("Abstract"))
+    notes = first_nonempty(manual.get("notes"))
+
+    row["date"] = normalize_date(first_nonempty(manual.get("date"), publication_date))
+    row["presenter"] = first_nonempty(manual.get("presenter"))
+    row["pmid"] = pmid
+    row["title"] = title
+    row["journal"] = journal
+    row["authors"] = authors
+    row["doi"] = doi
+    row["abstract"] = abstract
+    row["notes"] = notes
+    row["pdf"] = first_nonempty(
+        manual.get("pdf"),
+        f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else "",
+    )
+    row["subjects"] = first_nonempty(
+        manual.get("subjects"),
+        infer_subjects(title, journal, abstract, notes),
+    )
+    row["highlight"] = first_nonempty(manual.get("highlight"))
+    row["analysis"] = first_nonempty(manual.get("analysis"))
+    row["images"] = first_nonempty(manual.get("images"))
+    row["summary_month"] = first_nonempty(manual.get("summary_month"))
+    row["summary_headline"] = first_nonempty(manual.get("summary_headline"))
+    row["summary_paragraph"] = first_nonempty(manual.get("summary_paragraph"))
+    row["summary_highlights"] = first_nonempty(manual.get("summary_highlights"))
+
+    return row
 
 
 def main():
     repo_root = Path(__file__).parent
     ent_index = load_ent_index(repo_root)
     sessions_path = repo_root / "sessions.csv"
-    manual_sessions = load_manual_sessions(sessions_path)
+    existing_fieldnames, manual_sessions, orphan_rows = load_existing_sessions(
+        sessions_path
+    )
+    output_fieldnames = merge_fieldnames(existing_fieldnames)
 
     all_pmids = set(ent_index) | set(manual_sessions)
-    rows = []
+    rows: list[dict[str, str]] = []
     for pmid in all_pmids:
         art = ent_index.get(pmid)
         manual = manual_sessions.get(pmid)
-        rows.append(build_session_row(pmid, art, manual))
+        rows.append(build_session_row(pmid, art, manual, output_fieldnames))
+
+    for orphan in orphan_rows:
+        row = {field: orphan.get(field, "") for field in output_fieldnames}
+        row["date"] = normalize_date(orphan.get("date", ""))
+        rows.append(row)
 
     # Sort newest first by normalized date string
-    rows.sort(key=lambda r: r[0], reverse=True)
+    rows.sort(key=lambda row: row.get("date", ""), reverse=True)
 
     with sessions_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(
-            [
-                "date",
-                "presenter",
-                "pmid",
-                "title",
-                "journal",
-                "authors",
-                "doi",
-                "abstract",
-                "notes",
-                "pdf",
-            ]
-        )
+        writer = csv.DictWriter(f, fieldnames=output_fieldnames)
+        writer.writeheader()
         writer.writerows(rows)
 
     print(
-        f"Wrote {len(rows)} unique PMIDs to {sessions_path} using ent_all_results.json files across the repo"
+        f"Wrote {len(rows)} rows to {sessions_path} using ent_all_results.json files across the repo"
     )
 
 
