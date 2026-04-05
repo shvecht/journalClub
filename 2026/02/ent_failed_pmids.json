@@ -1,0 +1,126 @@
+{
+  "target_month": "2026-02",
+  "failed_pmids": [],
+  "filtered_out_pmids": [
+    {
+      "pmid": "41763121",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41735111",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41734480",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41722147",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41722146",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41720746",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41720745",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41719790",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41717880",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41702743",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41701015",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41691779",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41691778",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41687133",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41674188",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41674179",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41674159",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41671645",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41666572",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41664577",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41654414",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41644347",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    },
+    {
+      "pmid": "41629258",
+      "publication_date": "2026-Apr",
+      "publication_month": "2026-04"
+    },
+    {
+      "pmid": "41626737",
+      "publication_date": "2026-Mar",
+      "publication_month": "2026-03"
+    }
+  ]
+}
