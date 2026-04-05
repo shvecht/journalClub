@@ -149,25 +149,22 @@ jobs:
           git push "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Create backfill pull request
+      - name: Create or reuse backfill pull request
         if: steps.commit-backfill.outputs.pushed == 'true'
-        continue-on-error: true
-        id: create-backfill-pr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ steps.select-token.outputs.token }}
-          base: main
-          branch: ${{ steps.branch-name.outputs.branch }}
-          commit-message: "Backfill harvest for ${{ env.OUT_DIR }}"
-          title: "Backfill: ${{ env.OUT_DIR }}"
-          body: |
-            Backfill ENT harvest and regenerated data for ${{ env.OUT_DIR }}.
-          add-paths: |
-            ${{ env.OUT_DIR }}/
-            sessions.csv
-            data/journal_club.json
-
-      - name: Warn when pull request creation fails
-        if: steps.commit-backfill.outputs.pushed == 'true' && steps.create-backfill-pr.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ steps.select-token.outputs.token }}
+          TARGET_BRANCH: ${{ steps.branch-name.outputs.branch }}
+          REPO: ${{ github.repository }}
+          OUT_DIR: ${{ env.OUT_DIR }}
         run: |
-          echo "::warning::Unable to create PR automatically. Ensure repository allows GitHub Actions to open pull requests or provide an ENT_HARVEST_TOKEN secret with pull_request scope."
+          if gh pr view "$TARGET_BRANCH" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Pull request already exists for $TARGET_BRANCH"
+            exit 0
+          fi
+
+          gh pr create \
+            --repo "$REPO" \
+            --base main \
+            --head "$TARGET_BRANCH" \
+            --title "Backfill: $OUT_DIR" \
+            --body "Backfill ENT harvest and regenerated data for $OUT_DIR."
