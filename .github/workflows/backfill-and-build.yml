@@ -41,6 +41,19 @@ jobs:
           echo "OUT_DIR=$OUT_DIR" >> "$GITHUB_ENV"
           echo "TARGET_MONTH=$(echo "$OUT_DIR" | sed 's#/#-#')" >> "$GITHUB_ENV"
 
+      - name: Determine backfill branch
+        id: branch-name
+        run: |
+          echo "branch=backfill/${OUT_DIR}" >> "$GITHUB_OUTPUT"
+
+      - name: Create backfill branch from latest main
+        env:
+          TARGET_BRANCH: ${{ steps.branch-name.outputs.branch }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -118,22 +131,13 @@ jobs:
             echo "::notice::ENT_HARVEST_TOKEN not provided; using GITHUB_TOKEN for backfill pushes."
           fi
 
-      - name: Determine backfill branch
-        id: branch-name
-        run: |
-          echo "branch=backfill/${OUT_DIR}" >> "$GITHUB_OUTPUT"
-
       - name: Commit backfill artifacts
         if: steps.harvest-check.outputs.found == 'true'
         id: commit-backfill
         env:
           TOKEN: ${{ steps.select-token.outputs.token }}
           TARGET_BRANCH: ${{ steps.branch-name.outputs.branch }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          git fetch origin "$DEFAULT_BRANCH"
-          git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
-
           git add -A "$OUT_DIR" sessions.csv data/journal_club.json
 
           if git diff --cached --quiet; then
@@ -146,7 +150,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git commit -m "Backfill harvest for $OUT_DIR"
-          git push "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
+          git push --force-with-lease "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: Create or reuse backfill pull request
