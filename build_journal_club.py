@@ -9,17 +9,34 @@ ROOT = Path(__file__).parent
 def load_ent_index():
     """Index all ent_all_results.json files by PMID."""
     index = {}
-    for year_dir in ROOT.glob("20[0-9][0-9]"):
+    for year_dir in sorted(ROOT.glob("20[0-9][0-9]")):
         if not year_dir.is_dir():
             continue
-        for month_dir in year_dir.glob("[01][0-9]"):
+        for month_dir in sorted(year_dir.glob("[01][0-9]")):
             jf = month_dir / "ent_all_results.json"
             if jf.is_file():
+                folder_month = f"{year_dir.name}-{month_dir.name}"
                 articles = json.loads(jf.read_text(encoding="utf-8"))
+                skipped_out_of_month = 0
+                skipped_unknown_date = 0
                 for a in articles:
                     pmid = str(a.get("PMID", "")).strip()
+                    publication_month = normalize_publication_month(
+                        a.get("Publication_Date") or a.get("PublicationDate")
+                    )
+                    if not publication_month:
+                        skipped_unknown_date += 1
+                        continue
+                    if publication_month != folder_month:
+                        skipped_out_of_month += 1
+                        continue
                     if pmid:
                         index[pmid] = a
+                if skipped_out_of_month or skipped_unknown_date:
+                    print(
+                        f"Filtered {skipped_out_of_month} out-of-month and "
+                        f"{skipped_unknown_date} unknown-date records from {jf}"
+                    )
     return index
 
 def load_sessions():
@@ -150,6 +167,11 @@ def normalize_date(date_str_from_session, date_str_from_pub):
         return dt.date().isoformat()
     except Exception:
         return date_str  # worst case, just pass through
+
+
+def normalize_publication_month(date_str):
+    normalized = normalize_date("", date_str)
+    return normalized[:7] if normalized else ""
 
 def main():
     ent_index = load_ent_index()

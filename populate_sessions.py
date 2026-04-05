@@ -35,17 +35,34 @@ def load_ent_index(root: Path) -> dict[str, dict]:
     """Index all ent_all_results.json files by PMID."""
 
     index: dict[str, dict] = {}
-    for year_dir in root.glob("20[0-9][0-9]"):
+    for year_dir in sorted(root.glob("20[0-9][0-9]")):
         if not year_dir.is_dir():
             continue
-        for month_dir in year_dir.glob("[01][0-9]"):
+        for month_dir in sorted(year_dir.glob("[01][0-9]")):
             jf = month_dir / "ent_all_results.json"
             if jf.is_file():
+                folder_month = f"{year_dir.name}-{month_dir.name}"
                 articles = json.loads(jf.read_text(encoding="utf-8"))
+                skipped_out_of_month = 0
+                skipped_unknown_date = 0
                 for art in articles:
                     pmid = str(art.get("PMID", "")).strip()
-                    if pmid and pmid not in index:
+                    publication_month = normalize_publication_month(
+                        art.get("Publication_Date", art.get("PublicationDate", ""))
+                    )
+                    if not publication_month:
+                        skipped_unknown_date += 1
+                        continue
+                    if publication_month != folder_month:
+                        skipped_out_of_month += 1
+                        continue
+                    if pmid:
                         index[pmid] = art
+                if skipped_out_of_month or skipped_unknown_date:
+                    print(
+                        f"Filtered {skipped_out_of_month} out-of-month and "
+                        f"{skipped_unknown_date} unknown-date records from {jf}"
+                    )
     return index
 
 
@@ -133,6 +150,26 @@ def normalize_date(date_str: str) -> str:
     return date_str
 
 
+def normalize_publication_month(date_str: str) -> str:
+    normalized = normalize_date(date_str)
+    return normalized[:7] if normalized else ""
+
+
+def has_manual_curation(row: dict[str, str]) -> bool:
+    curated_fields = (
+        "presenter",
+        "notes",
+        "highlight",
+        "analysis",
+        "images",
+        "summary_month",
+        "summary_headline",
+        "summary_paragraph",
+        "summary_highlights",
+    )
+    return any(first_nonempty(row.get(field)) for field in curated_fields)
+
+
 def infer_subjects(title: str, journal: str, abstract: str, notes: str) -> str:
     text = " ".join(part for part in [title, journal, abstract, notes] if part)
     if not text.strip():
@@ -148,6 +185,7 @@ def build_session_row(
 ) -> dict[str, str]:
     art = art or {}
     manual = manual or {}
+    manual_is_curated = has_manual_curation(manual)
 
     row = {field: manual.get(field, "") for field in fieldnames}
 
@@ -159,7 +197,13 @@ def build_session_row(
     abstract = first_nonempty(manual.get("abstract"), art.get("Abstract"))
     notes = first_nonempty(manual.get("notes"))
 
-    row["date"] = normalize_date(first_nonempty(manual.get("date"), publication_date))
+    row["date"] = normalize_date(
+        first_nonempty(
+            manual.get("date") if manual_is_curated else "",
+            publication_date,
+            manual.get("date"),
+        )
+    )
     row["presenter"] = first_nonempty(manual.get("presenter"))
     row["pmid"] = pmid
     row["title"] = title
@@ -196,7 +240,10 @@ def main():
     )
     output_fieldnames = merge_fieldnames(existing_fieldnames)
 
-    all_pmids = set(ent_index) | set(manual_sessions)
+    curated_manual_pmids = {
+        pmid for pmid, row in manual_sessions.items() if has_manual_curation(row)
+    }
+    all_pmids = set(ent_index) | curated_manual_pmids
     rows: list[dict[str, str]] = []
     for pmid in all_pmids:
         art = ent_index.get(pmid)

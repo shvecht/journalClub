@@ -207,6 +207,7 @@ async function loadSessions() {
     currentSummaryMonth = null;
     sessions.sort((a, b) => b.dateObj - a.dateObj);
 
+    syncDefaultPublicationMonth();
     buildFilterOptions();
     updateStats();
     renderMonthlySummary();
@@ -228,6 +229,10 @@ function normaliseSessions(raw) {
       const monthIndex = Number.isFinite(dateObj.getTime())
         ? dateObj.getMonth()
         : null;
+      const publicationMonth = typeof item.date === "string"
+        ? item.date.slice(0, 7)
+        : "";
+      const publicationMonthDate = parseMonthDate(publicationMonth);
 
       const subjects = Array.isArray(item.subjects)
         ? item.subjects.map((s) => String(s).trim()).filter(Boolean)
@@ -245,6 +250,8 @@ function normaliseSessions(raw) {
         dateObj,
         year,
         monthIndex,
+        publicationMonth,
+        publicationMonthDate,
         subjects,
         highlight: Boolean(item.highlight),
         analysis,
@@ -285,21 +292,23 @@ function normaliseSummaries(raw) {
 /* ---------- Filters and search ---------- */
 
 function buildFilterOptions() {
-  const months = Array.from(
+  const publicationMonths = Array.from(
     new Set(
       sessions
-        .map((s) => s.monthIndex)
-        .filter((m) => m !== null && m !== undefined)
+        .map((s) => s.publicationMonth)
+        .filter(Boolean)
     )
-  ).sort((a, b) => a - b);
+  ).sort((a, b) => b.localeCompare(a));
 
-  fillSelect(yearFilterEl, ["all", ...months], (val) =>
+  fillSelect(yearFilterEl, ["all", ...publicationMonths], (val) =>
     val === "all"
-      ? "All months"
-      : new Date(2000, Number(val), 1).toLocaleString(undefined, {
-          month: "long"
-        })
+      ? "All publication months"
+      : formatMonthLabel(parseMonthDate(String(val))) || String(val)
   );
+
+  if (yearFilterEl) {
+    yearFilterEl.value = state.month;
+  }
 
   const journals = Array.from(
     new Set(sessions.map((s) => s.journal).filter(Boolean))
@@ -340,7 +349,7 @@ function applyFiltersAndRender() {
   filteredSessions = sessions.filter((session) => {
     if (
       state.month !== "all" &&
-      String(session.monthIndex) !== String(state.month)
+      session.publicationMonth !== state.month
     ) {
       return false;
     }
@@ -380,6 +389,22 @@ function applyFiltersAndRender() {
   renderTimeline();
   renderCardDeck();
   updateViewVisibility();
+}
+
+function syncDefaultPublicationMonth() {
+  if (state.month !== "all") return;
+  const latestMonth = getLatestPublicationMonth();
+  if (!latestMonth) return;
+  state.month = latestMonth;
+}
+
+function getLatestPublicationMonth() {
+  for (const session of sessions) {
+    if (session.publicationMonth) {
+      return session.publicationMonth;
+    }
+  }
+  return "";
 }
 
 /* ---------- Monthly summary ---------- */
@@ -882,11 +907,15 @@ function updateStats() {
   const totalJournals = new Set(
     sessions.map((s) => s.journal).filter(Boolean)
   ).size;
-  const latestYear = Math.max(...sessions.map((s) => s.year));
+  const latestMonth = getLatestPublicationMonth();
 
   animateCounter(statSessionsEl, totalSessions);
   animateCounter(statJournalsEl, totalJournals);
-  if (statLatestYearEl) statLatestYearEl.textContent = String(latestYear);
+  if (statLatestYearEl) {
+    statLatestYearEl.textContent = latestMonth
+      ? formatMonthLabel(parseMonthDate(latestMonth)) || latestMonth
+      : "–";
+  }
 }
 
 function setCounter(el, value) {

@@ -45,6 +45,7 @@ jobs:
 
           echo "OUT_DIR=$OUT_DIR" >> "$GITHUB_ENV"
           echo "branch=ent-harvest/$OUT_DIR" >> "$GITHUB_OUTPUT"
+          echo "target_month=$(echo "$OUT_DIR" | sed 's#/#-#')" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,14 +62,12 @@ jobs:
       - name: Run articlesRetrieval notebook
         env:
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
-          TARGET_MONTH: ${{ github.event.inputs.target_month }}
-          TARGET_YEAR: ${{ github.event.inputs.year }}
-          TARGET_MONTH_NUMBER: ${{ github.event.inputs.month }}
+          TARGET_MONTH: ${{ steps.target.outputs.target_month }}
         run: |
           papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb \
             -p TARGET_MONTH "${TARGET_MONTH}" \
-            -p TARGET_YEAR "${TARGET_YEAR}" \
-            -p TARGET_MONTH_NUMBER "${TARGET_MONTH_NUMBER}"
+            -p TARGET_YEAR "" \
+            -p TARGET_MONTH_NUMBER ""
 
       - name: Organize outputs by month
         run: |
@@ -87,6 +86,7 @@ jobs:
           move_if_exists \
             "$SOURCE_DIR"/ent_raw_results_*.csv \
             "$SOURCE_DIR"/ent_all_results.json \
+            "$SOURCE_DIR"/ent_failed_pmids.json \
             "$SOURCE_DIR"/ent_curated.csv \
             "$SOURCE_DIR"/ent_report.md
           move_if_exists articlesRetrieval.out.ipynb
@@ -192,6 +192,7 @@ jobs:
           path: |
             ${{ env.OUT_DIR }}/ent_raw_results*.csv
             ${{ env.OUT_DIR }}/ent_all_results.json
+            ${{ env.OUT_DIR }}/ent_failed_pmids.json
             ${{ env.OUT_DIR }}/ent_curated.csv
             ${{ env.OUT_DIR }}/ent_report.md
             ${{ env.OUT_DIR }}/articlesRetrieval.out.ipynb

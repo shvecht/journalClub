@@ -6,7 +6,10 @@ on:
       - main
     paths:
       - sessions.csv
+      - populate_sessions.py
       - build_journal_club.py
+      - '.github/workflows/build-journal-data.yml'
+      - '20[0-9][0-9]/**/ent_all_results.json'
   workflow_dispatch:
 
 permissions:
@@ -26,20 +29,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate data/journal_club.json
+      - name: Rebuild sessions and site data
         run: |
+          python populate_sessions.py
           python build_journal_club.py
 
       - name: Commit and push updated site data
         run: |
-          if git diff --quiet -- data/journal_club.json; then
-            echo "No data changes to commit."
+          if git diff --quiet -- sessions.csv data/journal_club.json; then
+            echo "No downstream data changes to commit."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add data/journal_club.json
+          git add sessions.csv data/journal_club.json
           git commit -m "chore: rebuild journal club data"
           git push

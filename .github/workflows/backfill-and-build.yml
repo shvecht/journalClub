@@ -39,6 +39,7 @@ jobs:
 
           echo "Using OUT_DIR=$OUT_DIR"
           echo "OUT_DIR=$OUT_DIR" >> "$GITHUB_ENV"
+          echo "TARGET_MONTH=$(echo "$OUT_DIR" | sed 's#/#-#')" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         with:
@@ -54,14 +55,12 @@ jobs:
       - name: Run articlesRetrieval notebook
         env:
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
-          TARGET_MONTH: ${{ inputs.target_month }}
-          TARGET_YEAR: ${{ inputs.year }}
-          TARGET_MONTH_NUMBER: ${{ inputs.month }}
+          TARGET_MONTH: ${{ env.TARGET_MONTH }}
         run: |
           papermill articlesRetrieval.ipynb articlesRetrieval.out.ipynb \
             -p TARGET_MONTH "$TARGET_MONTH" \
-            -p TARGET_YEAR "$TARGET_YEAR" \
-            -p TARGET_MONTH_NUMBER "$TARGET_MONTH_NUMBER"
+            -p TARGET_YEAR "" \
+            -p TARGET_MONTH_NUMBER ""
 
       - name: Organize outputs by month
         run: |
@@ -79,6 +78,7 @@ jobs:
           }
 
           move_if_exists "$SOURCE_DIR"/ent_raw_results_*.csv "$SOURCE_DIR"/ent_all_results.json "$SOURCE_DIR"/ent_curated.csv "$SOURCE_DIR"/ent_report.md
+          move_if_exists "$SOURCE_DIR"/ent_failed_pmids.json
           move_if_exists articlesRetrieval.out.ipynb
           shopt -u nullglob
 
