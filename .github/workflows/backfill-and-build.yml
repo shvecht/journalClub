@@ -52,6 +52,7 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           git fetch origin "$DEFAULT_BRANCH"
+          git fetch origin "$TARGET_BRANCH":"refs/remotes/origin/$TARGET_BRANCH" || true
           git checkout -B "$TARGET_BRANCH" "origin/$DEFAULT_BRANCH"
 
       - uses: actions/setup-python@v5
@@ -150,7 +151,16 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git commit -m "Backfill harvest for $OUT_DIR"
-          git push --force-with-lease "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$TARGET_BRANCH"
+
+          if git show-ref --verify --quiet "refs/remotes/origin/$TARGET_BRANCH"; then
+            REMOTE_SHA=$(git rev-parse "refs/remotes/origin/$TARGET_BRANCH")
+            git push \
+              --force-with-lease="refs/heads/$TARGET_BRANCH:$REMOTE_SHA" \
+              "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" \
+              "HEAD:$TARGET_BRANCH"
+          else
+            git push "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "HEAD:$TARGET_BRANCH"
+          fi
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: Create or reuse backfill pull request
