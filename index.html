@@ -71,14 +71,28 @@
       </section>
 
       <section class="controls" aria-label="Filters and search">
-        <div class="filters">
-          <div class="filter-group">
-            <label for="yearFilter" class="filter-label">Publication month</label>
-            <select id="yearFilter" class="filter-select">
-              <option value="all">All publication months</option>
-            </select>
+        <div class="month-filter-panel">
+          <div class="month-filter-heading">
+            <div>
+              <p class="filter-label month-filter-label">Publication month</p>
+              <p class="month-filter-copy">One control drives both the paper list and the monthly recap.</p>
+            </div>
+            <p class="month-filter-status" id="monthFilterStatus">Latest curated month</p>
           </div>
+          <div class="month-filter-rail" id="monthFilterRail" role="tablist" aria-label="Publication month">
+            <button
+              type="button"
+              class="month-pill month-pill-all active"
+              data-month="all"
+              role="tab"
+              aria-selected="true"
+            >
+              All months
+            </button>
+          </div>
+        </div>
 
+        <div class="filters">
           <div class="filter-group">
             <label for="journalFilter" class="filter-label">Journal</label>
             <select id="journalFilter" class="filter-select">
@@ -112,19 +126,19 @@
           <div class="view-toggle" role="tablist" aria-label="View mode">
             <button
               type="button"
-              class="view-toggle-btn active"
+              class="view-toggle-btn"
               data-view="sessions"
               role="tab"
-              aria-selected="true"
+              aria-selected="false"
             >
               Sessions
             </button>
             <button
               type="button"
-              class="view-toggle-btn"
+              class="view-toggle-btn active"
               data-view="cards"
               role="tab"
-              aria-selected="false"
+              aria-selected="true"
             >
               Cards
             </button>
@@ -142,27 +156,32 @@
       </section>
 
       <section class="monthly-summary" id="summarySection" aria-live="polite">
-        <div class="summary-header">
-          <div>
-            <p class="summary-label">Monthly summary</p>
-            <h2 class="summary-month" id="summaryMonth">Latest</h2>
-            <p class="summary-headline" id="summaryHeadline"></p>
+        <button
+          type="button"
+          class="summary-toggle"
+          id="summaryToggle"
+          aria-expanded="true"
+          aria-controls="summaryContent"
+        >
+          <div class="summary-header">
+            <div>
+              <p class="summary-label">Monthly summary</p>
+              <h2 class="summary-month" id="summaryMonth">Latest</h2>
+              <p class="summary-headline" id="summaryHeadline"></p>
+            </div>
+            <span class="summary-toggle-hint">Hide recap</span>
           </div>
-          <div class="summary-archive">
-            <label for="summaryArchive" class="summary-archive-label">Archive</label>
-            <select id="summaryArchive" class="summary-archive-select" aria-label="Monthly summary archive">
-              <option value="">No summaries yet</option>
-            </select>
+        </button>
+
+        <div class="summary-content" id="summaryContent">
+          <div class="summary-body" id="summaryBody">
+            <p class="summary-paragraph" id="summaryParagraph"></p>
+            <ul class="summary-highlights" id="summaryHighlights"></ul>
           </div>
-        </div>
 
-        <div class="summary-body" id="summaryBody">
-          <p class="summary-paragraph" id="summaryParagraph"></p>
-          <ul class="summary-highlights" id="summaryHighlights"></ul>
-        </div>
-
-        <div class="summary-empty" id="summaryEmpty">
-          <p>No monthly summary is available yet. Fresh recaps will appear once they are curated.</p>
+          <div class="summary-empty" id="summaryEmpty">
+            <p>No monthly summary is available yet. Fresh recaps will appear once they are curated.</p>
+          </div>
         </div>
       </section>
 

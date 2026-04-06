@@ -4,11 +4,12 @@ const THEME_STORAGE_KEY = "jc-theme-preference";
 
 let sessions = [];
 let filteredSessions = [];
-let viewMode = "sessions";
+let viewMode = "cards";
 let monthlySummaries = [];
 let currentSummaryMonth = null;
 let focusedCard = null;
 let cardFocusOverlay = null;
+let publicationMonths = [];
 
 const state = {
   month: "all",
@@ -22,17 +23,19 @@ const sessionsListEl = document.getElementById("sessionsList");
 const timelineViewEl = document.getElementById("timelineView");
 const cardDeckViewEl = document.getElementById("cardDeckView");
 
-const yearFilterEl = document.getElementById("yearFilter");
+const monthFilterRailEl = document.getElementById("monthFilterRail");
+const monthFilterStatusEl = document.getElementById("monthFilterStatus");
 const journalFilterEl = document.getElementById("journalFilter");
 const subjectFilterEl = document.getElementById("subjectFilter");
 const searchInputEl = document.getElementById("searchInput");
 
 const summarySectionEl = document.getElementById("summarySection");
+const summaryToggleEl = document.getElementById("summaryToggle");
+const summaryContentEl = document.getElementById("summaryContent");
 const summaryMonthEl = document.getElementById("summaryMonth");
 const summaryHeadlineEl = document.getElementById("summaryHeadline");
 const summaryParagraphEl = document.getElementById("summaryParagraph");
 const summaryHighlightsEl = document.getElementById("summaryHighlights");
-const summaryArchiveSelectEl = document.getElementById("summaryArchive");
 const summaryEmptyEl = document.getElementById("summaryEmpty");
 const summaryBodyEl = document.getElementById("summaryBody");
 
@@ -48,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initCardFocusOverlay();
   attachEventHandlers();
+  setSummaryExpanded(true);
   loadSessions();
 });
 
@@ -66,10 +70,15 @@ function initCardFocusOverlay() {
 }
 
 function attachEventHandlers() {
-  if (yearFilterEl) {
-    yearFilterEl.addEventListener("change", () => {
-      state.month = yearFilterEl.value;
-      applyFiltersAndRender();
+  if (monthFilterRailEl) {
+    monthFilterRailEl.addEventListener("click", (event) => {
+      const button = event.target && event.target.closest
+        ? event.target.closest("[data-month]")
+        : null;
+      if (!button) return;
+      const requestedMonth = button.getAttribute("data-month") || "all";
+      if (requestedMonth === state.month) return;
+      setActiveMonth(requestedMonth);
     });
   }
 
@@ -95,17 +104,15 @@ function attachEventHandlers() {
     });
   }
 
-  if (summaryArchiveSelectEl) {
-    summaryArchiveSelectEl.addEventListener("change", () => {
-      const selected = summaryArchiveSelectEl.value;
-      if (selected) {
-        renderMonthlySummary(selected);
-      }
-    });
-  }
-
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener("click", toggleTheme);
+  }
+
+  if (summaryToggleEl) {
+    summaryToggleEl.addEventListener("click", () => {
+      const isExpanded = summaryToggleEl.getAttribute("aria-expanded") !== "false";
+      setSummaryExpanded(!isExpanded);
+    });
   }
 
   if (viewToggleBtns && viewToggleBtns.length) {
@@ -292,23 +299,14 @@ function normaliseSummaries(raw) {
 /* ---------- Filters and search ---------- */
 
 function buildFilterOptions() {
-  const publicationMonths = Array.from(
+  publicationMonths = Array.from(
     new Set(
       sessions
         .map((s) => s.publicationMonth)
         .filter(Boolean)
     )
   ).sort((a, b) => b.localeCompare(a));
-
-  fillSelect(yearFilterEl, ["all", ...publicationMonths], (val) =>
-    val === "all"
-      ? "All publication months"
-      : formatMonthLabel(parseMonthDate(String(val))) || String(val)
-  );
-
-  if (yearFilterEl) {
-    yearFilterEl.value = state.month;
-  }
+  buildMonthFilterRail();
 
   const journals = Array.from(
     new Set(sessions.map((s) => s.journal).filter(Boolean))
@@ -343,6 +341,83 @@ function fillSelect(selectEl, values, labelFn) {
     if (String(val) === previous) opt.selected = true;
     selectEl.appendChild(opt);
   });
+}
+
+function buildMonthFilterRail() {
+  if (!monthFilterRailEl) return;
+
+  monthFilterRailEl.innerHTML = "";
+  const summaryMonths = new Set(monthlySummaries.map((summary) => summary.month));
+  const options = ["all", ...publicationMonths];
+
+  options.forEach((month) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "month-pill" + (month === "all" ? " month-pill-all" : "");
+    button.setAttribute("data-month", month);
+    button.setAttribute("role", "tab");
+
+    const isActive = month === state.month;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+
+    if (month === "all") {
+      button.innerHTML = `
+        <span class="month-pill-label">All months</span>
+        <span class="month-pill-meta">${publicationMonths.length}</span>
+      `;
+    } else {
+      const label = formatMonthLabel(parseMonthDate(month)) || month;
+      const meta = summaryMonths.has(month) ? "Recap" : "Papers";
+      button.innerHTML = `
+        <span class="month-pill-label">${escapeHtml(label)}</span>
+        <span class="month-pill-meta">${escapeHtml(meta)}</span>
+      `;
+    }
+
+    monthFilterRailEl.appendChild(button);
+  });
+
+  updateMonthFilterStatus();
+}
+
+function setActiveMonth(month) {
+  state.month = month || "all";
+  updateMonthRailSelection();
+  updateMonthFilterStatus();
+  renderMonthlySummary();
+  applyFiltersAndRender();
+}
+
+function updateMonthRailSelection() {
+  if (!monthFilterRailEl) return;
+  const monthButtons = monthFilterRailEl.querySelectorAll("[data-month]");
+  monthButtons.forEach((button) => {
+    const isActive = button.getAttribute("data-month") === state.month;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    if (isActive) {
+      button.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    }
+  });
+}
+
+function updateMonthFilterStatus() {
+  if (!monthFilterStatusEl) return;
+  if (state.month === "all") {
+    const latestSummaryMonth = getLatestSummaryMonth();
+    const latestLabel = formatMonthLabel(parseMonthDate(latestSummaryMonth));
+    monthFilterStatusEl.textContent = latestLabel
+      ? `Showing all papers · recap pinned to ${latestLabel}`
+      : "Showing all papers";
+    return;
+  }
+
+  const label = formatMonthLabel(parseMonthDate(state.month)) || state.month;
+  const hasSummary = monthlySummaries.some((summary) => summary.month === state.month);
+  monthFilterStatusEl.textContent = hasSummary
+    ? `${label} · papers and recap aligned`
+    : `${label} · papers aligned, no recap yet`;
 }
 
 function applyFiltersAndRender() {
@@ -385,6 +460,8 @@ function applyFiltersAndRender() {
     return true;
   });
 
+  filteredSessions.sort(compareSessionsForDisplay);
+
   renderCards();
   renderTimeline();
   renderCardDeck();
@@ -407,31 +484,48 @@ function getLatestPublicationMonth() {
   return "";
 }
 
+function getLatestSummaryMonth() {
+  return monthlySummaries.length ? monthlySummaries[0].month : "";
+}
+
 /* ---------- Monthly summary ---------- */
 
-function renderMonthlySummary(requestedMonth) {
+function renderMonthlySummary() {
   if (!summarySectionEl) return;
 
+  const summaryMonth = state.month === "all"
+    ? getLatestSummaryMonth()
+    : state.month;
+
   if (!monthlySummaries.length) {
-    if (summaryArchiveSelectEl) {
-      summaryArchiveSelectEl.innerHTML = "<option value=\"\">No summaries yet</option>";
-      summaryArchiveSelectEl.disabled = true;
-    }
     if (summaryBodyEl) summaryBodyEl.classList.add("hidden");
     if (summaryEmptyEl) summaryEmptyEl.classList.remove("hidden");
+    if (summaryMonthEl) {
+      summaryMonthEl.textContent = state.month === "all"
+        ? "Latest curated month"
+        : formatMonthLabel(parseMonthDate(state.month)) || state.month || "Monthly recap";
+    }
+    if (summaryHeadlineEl) {
+      summaryHeadlineEl.textContent = state.month === "all"
+        ? "No monthly summaries are available yet."
+        : "No recap has been curated for this month yet.";
+    }
     return;
   }
 
-  const selectedSummary = requestedMonth
-    ? monthlySummaries.find((s) => s.month === requestedMonth)
-    : monthlySummaries[0];
-
-  const summary = selectedSummary || monthlySummaries[0];
+  const summary = monthlySummaries.find((s) => s.month === summaryMonth) || null;
   currentSummaryMonth = summary ? summary.month : null;
 
-  if (summaryArchiveSelectEl) {
-    buildSummaryArchiveOptions(currentSummaryMonth);
-    summaryArchiveSelectEl.disabled = monthlySummaries.length <= 1;
+  if (!summary) {
+    if (summaryBodyEl) summaryBodyEl.classList.add("hidden");
+    if (summaryEmptyEl) summaryEmptyEl.classList.remove("hidden");
+    if (summaryMonthEl) {
+      summaryMonthEl.textContent = formatMonthLabel(parseMonthDate(summaryMonth)) || summaryMonth || "Monthly recap";
+    }
+    if (summaryHeadlineEl) {
+      summaryHeadlineEl.textContent = "This month does not have a curated recap yet.";
+    }
+    return;
   }
 
   if (summaryEmptyEl) summaryEmptyEl.classList.add("hidden");
@@ -444,7 +538,7 @@ function renderMonthlySummary(requestedMonth) {
     summaryParagraphEl.textContent = summary?.paragraph
       ? summary.paragraph
       : "A curated overview for this month will appear here once available.";
-    summaryParagraphEl.classList.toggle("summary-text-muted", !summary?.paragraph);
+      summaryParagraphEl.classList.toggle("summary-text-muted", !summary?.paragraph);
   }
 
   if (summaryHighlightsEl) {
@@ -460,17 +554,15 @@ function renderMonthlySummary(requestedMonth) {
   }
 }
 
-function buildSummaryArchiveOptions(selectedMonth) {
-  if (!summaryArchiveSelectEl) return;
-  summaryArchiveSelectEl.innerHTML = "";
+function setSummaryExpanded(expanded) {
+  if (!summaryToggleEl || !summaryContentEl || !summarySectionEl) return;
+  summaryToggleEl.setAttribute("aria-expanded", String(expanded));
+  summarySectionEl.classList.toggle("is-collapsed", !expanded);
 
-  monthlySummaries.forEach((summary, index) => {
-    const opt = document.createElement("option");
-    opt.value = summary.month;
-    opt.textContent = formatMonthLabel(summary.monthDate) || summary.month || `Summary ${index + 1}`;
-    opt.selected = summary.month === selectedMonth || (!selectedMonth && index === 0);
-    summaryArchiveSelectEl.appendChild(opt);
-  });
+  const hintEl = summaryToggleEl.querySelector(".summary-toggle-hint");
+  if (hintEl) {
+    hintEl.textContent = expanded ? "Hide recap" : "Show recap";
+  }
 }
 
 /* ---------- Rendering: cards ---------- */
@@ -946,6 +1038,19 @@ function animateCounter(el, target, duration = 800) {
 
 function easeOutQuad(t) {
   return t * (2 - t);
+}
+
+function compareSessionsForDisplay(a, b) {
+  if (a.highlight !== b.highlight) {
+    return a.highlight ? -1 : 1;
+  }
+
+  if (a.dateObj && b.dateObj) {
+    const dateDiff = b.dateObj - a.dateObj;
+    if (dateDiff !== 0) return dateDiff;
+  }
+
+  return (a.title || "").localeCompare(b.title || "");
 }
 
 /* ---------- Utilities ---------- */
