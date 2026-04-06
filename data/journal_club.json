@@ -2071,7 +2071,7 @@
       "subjects": [
         "General ENT/Other"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -4694,7 +4694,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -4713,7 +4713,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -6751,7 +6751,7 @@
         "Infectious Disease",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -8262,7 +8262,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -8282,7 +8282,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -8323,7 +8323,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -8731,7 +8731,7 @@
         "Otology & Neurotology",
         "Pediatrics"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -9064,7 +9064,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -9645,7 +9645,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -10003,7 +10003,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -11305,7 +11305,7 @@
         "Endocrine (Thyroid/Parathyroid)",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -13882,7 +13882,7 @@
         "Endocrine (Thyroid/Parathyroid)",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -14853,7 +14853,7 @@
       "subjects": [
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -16022,7 +16022,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -16043,7 +16043,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -16061,7 +16061,7 @@
       "subjects": [
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -16154,7 +16154,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -16174,7 +16174,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -17071,7 +17071,7 @@
       "subjects": [
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -17799,7 +17799,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -18286,7 +18286,7 @@
         "Airway & Trachea",
         "Trauma"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -18650,7 +18650,7 @@
         "Laryngology & Voice",
         "Sleep Medicine"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -19187,7 +19187,7 @@
         "Head & Neck Oncology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -19243,7 +19243,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -19737,7 +19737,7 @@
         "Otology & Neurotology",
         "Pediatrics"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -20038,7 +20038,7 @@
       "subjects": [
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -20110,7 +20110,7 @@
       "subjects": [
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -20801,7 +20801,7 @@
         "Laryngology & Voice",
         "Sleep Medicine"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -21986,7 +21986,7 @@
       "subjects": [
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -24845,7 +24845,7 @@
       "subjects": [
         "General ENT/Other"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -25298,7 +25298,7 @@
       "subjects": [
         "Trauma"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -25614,7 +25614,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -25938,7 +25938,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -25959,7 +25959,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -26454,7 +26454,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -26513,7 +26513,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -26803,7 +26803,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -27747,7 +27747,7 @@
       "subjects": [
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -28456,7 +28456,7 @@
         "Laryngology & Voice",
         "Salivary & Oral Cavity"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -30523,7 +30523,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -30747,7 +30747,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -31529,7 +31529,7 @@
       "subjects": [
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -33220,7 +33220,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -33589,7 +33589,7 @@
         "Pediatrics",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -34135,7 +34135,7 @@
         "Salivary & Oral Cavity",
         "Sleep Medicine"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -34323,7 +34323,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -34516,7 +34516,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -34688,7 +34688,7 @@
         "Otology & Neurotology",
         "Pediatrics"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -35132,7 +35132,7 @@
         "Otology & Neurotology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -35744,7 +35744,7 @@
         "Otology & Neurotology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -35898,7 +35898,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -40252,7 +40252,7 @@
         "Laryngology & Voice",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -40292,7 +40292,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -40352,7 +40352,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -41082,7 +41082,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -41350,7 +41350,7 @@
         "Laryngology & Voice",
         "Sleep Medicine"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -41752,7 +41752,7 @@
         "Laryngology & Voice",
         "Otology & Neurotology"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -41907,7 +41907,7 @@
         "Salivary & Oral Cavity",
         "Sleep Medicine"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -41984,7 +41984,7 @@
         "Laryngology & Voice",
         "Pediatrics"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -42570,7 +42570,7 @@
         "Head & Neck Oncology",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -42912,7 +42912,7 @@
       "subjects": [
         "General ENT/Other"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -43710,7 +43710,7 @@
         "Head & Neck Oncology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -45268,7 +45268,7 @@
       "subjects": [
         "General ENT/Other"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -45323,7 +45323,7 @@
         "Otology & Neurotology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -45796,7 +45796,7 @@
         "Endocrine (Thyroid/Parathyroid)",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -46507,7 +46507,7 @@
       "subjects": [
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -46623,7 +46623,7 @@
         "Otology & Neurotology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -46782,7 +46782,7 @@
         "Otology & Neurotology",
         "Rhinology & Allergy"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -46975,7 +46975,7 @@
         "Facial Plastics & Reconstruction",
         "Laryngology & Voice"
       ],
-      "highlight": false,
+      "highlight": true,
       "analysis": "",
       "images": []
     },
@@ -47568,5 +47568,96 @@
       "images": []
     }
   ],
-  "monthly_summaries": []
+  "monthly_summaries": [
+    {
+      "month": "2026-03",
+      "headline": "March 2026: Advances in head & neck oncology, perioperative infection, and functional ENT outcomes",
+      "paragraph": "This month's selection emphasizes high-impact evidence and innovations likely to influence clinical decision-making across rhinology, head & neck oncology, otology, pediatrics, and perioperative infectious disease. Highlights include systematic reviews and randomized trials that refine risk stratification and new therapeutics (neoadjuvant immunotherapy, intratumoral radioenhancers), practical device and behavioral interventions (tympanostomy tube autoinflation, eustachian tube dilation evidence), and prognostic tools for cochlear implant outcomes and invasive fungal sinusitis in immunocompromised patients. Together these papers offer both immediate practice implications and directions for future research.",
+      "key_highlights": [
+        "Meta-analyses and systematic reviews shaping management of invasive fungal rhinosinusitis and neoadjuvant immunotherapy strategies in HNSCC",
+        "Imaging + machine learning advances to predict extranodal extension with potential to alter surgical and adjuvant therapy planning",
+        "Novel local radioenhancer (NBTXR3) early-phase data introduces a new radiosensitization approach for head & neck tumors",
+        "Practical ENT interventions: randomized evidence on autoinflation after tympanostomy tube extrusion and consolidated evidence for balloon Eustachian tube dilation",
+        "Pediatric and auditory prognostication: preimplant MRI biomarkers for spoken language outcomes after cochlear implantation"
+      ]
+    },
+    {
+      "month": "2026-02",
+      "headline": "Feb 2026: Thyroid operation strategies, H&N oncology timing and immunotherapy signals, laryngeal breathing therapy, and advances in cochlear monitoring",
+      "paragraph": "This month’s selections emphasize practice-defining evidence and pragmatic tools across endocrinologic head & neck care, oncologic timing and systemic therapy signals, laryngology therapeutics, and intraoperative and physiologic monitoring in hearing restoration. High-quality randomized trials and large meta-analyses address thyroid extent and postoperative supplementation, interruptions and neoadjuvant immunotherapy in head & neck cancer, a randomized behavioral therapy for inducible laryngeal obstruction, GLP-1RA-associated respiratory symptoms, and automated electrophysiologic methods that could change cochlear implant monitoring and interpretation.",
+      "key_highlights": [
+        "Randomized evidence on routine vs selective calcium after total thyroidectomy may change discharge/medication protocols.",
+        "Meta-analyses and cohort syntheses clarify extent-of-surgery decisions in medullary and papillary thyroid microcarcinoma, with patient-reported outcome context.",
+        "Head & neck oncology: treatment interruptions remain consequential and neoadjuvant immunotherapy shows notable pathologic-response signals.",
+        "A pragmatic RCT supports biofeedback over respiratory retraining for inducible laryngeal obstruction, offering an immediate clinical option.",
+        "Large studies propose automated, standardized electrophysiologic metrics (ECAP/ECoG) to improve intraoperative hearing-preservation decisions in cochlear implantation.",
+        "Pharmacovigilance signal linking GLP-1 receptor agonists to chronic cough has implications for peri-laryngologic assessment as these drugs expand."
+      ]
+    },
+    {
+      "month": "2026-01",
+      "headline": "Jan 2026 ENT Journal Club: Rhinology practice pivots, perioperative hemostasis, sleep diagnostics, cochlear timing, and head–neck therapeutics",
+      "paragraph": "This month’s selection emphasizes high-impact evidence and guidance with immediate clinical relevance across rhinology, perioperative care, sleep medicine, pediatric otology, and head & neck oncology. Key randomized trials, systematic reviews/meta-analyses, and expert consensus statements address controlled hypotension in ESS, the evolving role of biologics versus surgery for CRSwNP, perioperative/critical-care dialysis strategies, feasibility of remote sleep endoscopy, cochlear implantation timing after meningitis, and an important immunotherapy approach for nasopharyngeal carcinoma — all likely to influence decision-making in multidisciplinary ENT practice.",
+      "key_highlights": [
+        "Network meta-analysis identifies optimal hypotensive agents for clearer visualization and potentially reduced blood loss in ESS.",
+        "Converging evidence and meta-analyses refine where biologics versus endoscopic sinus surgery fit in CRSwNP management and steroid-sparing strategies.",
+        "Consensus recommendations on surgical adequacy for diffuse CRS provide practical benchmarks for operative decision-making.",
+        "Feasibility data on home sleep endoscopy and new pediatric OSA polysomnographic insights support expanded outpatient and pediatric sleep strategies.",
+        "Guidance on timing for cochlear implantation after meningitis and new oncologic immunotherapy data (toripalimab without concurrent cisplatin) inform time-sensitive, high-stakes interventions.",
+        "A major RCT on conservative dialysis strategies highlights perioperative/critical-care care pathways that affect recovery and resource use for complex patients."
+      ]
+    },
+    {
+      "month": "2025-12",
+      "headline": "Dec 2025: Head‑&‑Neck oncology advances (biomarkers, access, palliative decisions) and perioperative practice updates (BP strategies, rhinoplasty NSAIDs, olfaction links)",
+      "paragraph": "This month's selection emphasizes high‑impact evidence likely to affect surgical decision‑making and perioperative care across otolaryngology subspecialties. Key themes include refinement of transoral/biomarker strategies and survivorship/palliative decisions in head and neck cancer, randomized trials redefining intraoperative blood‑pressure management, practical guidance on rhinoplasty analgesia, and population signals linking olfaction to cognitive decline and opioid risk in HNC. Together these papers offer immediate clinical implications and topics for faculty discussion on protocols, patient counseling, and multidisciplinary pathways.",
+      "key_highlights": [
+        "Meta‑analytic evidence informing unilateral vs bilateral transoral approaches and biologic surveillance (ctHPV) could change operative scope and follow‑up algorithms in oropharyngeal cancer.",
+        "Randomized trials (PRETREAT, IMPROVE‑multi) provide new data to guide proactive and individualized intraoperative blood‑pressure strategies with implications for organ injury and functional recovery.",
+        "Perioperative NSAIDs in rhinoplasty and broader analgesic risk data support reappraisal of multimodal pain protocols.",
+        "Population and cohort analyses highlight links between olfactory loss and later cognitive decline, and psychiatric comorbidity with prolonged opioid use in HNC—prompting earlier screening and integrated care.",
+        "Palliative care timing, barriers to timely PORT, and precision immuno‑oncology targets underscore system and translational priorities in head & neck cancer care."
+      ]
+    },
+    {
+      "month": "2025-11",
+      "headline": "November 2025: Practice-defining trials and guidance across pediatric ENT, rhinology, head & neck oncology, and perioperative care",
+      "paragraph": "This month's selection emphasizes randomized trials and high-yield syntheses that are likely to change clinic workflows and perioperative decision-making across subspecialties. Key themes include pediatric care pathway optimization (tubes, adenotonsillectomy, vestibular testing), perioperative management (transfusion thresholds, strategies to improve surgical field), evolving oncologic radiation strategies for the larynx, and cross-cutting topics — AI adoption and real-world practice patterns in sinus dilation. These papers together offer actionable evidence and consensus that faculty should discuss for immediate clinical application and incorporation into local protocols.",
+      "key_highlights": [
+        "Two randomized pediatric trials reframe expectations for follow-up and surgery: outpatient/GP surveillance after ear tubes and long-term outcomes after adenotonsillectomy vs watchful waiting.",
+        "Perioperative management trials/meta-analyses offer practical changes: liberal vs restrictive transfusion in high‑cardiac‑risk patients and preop oral clonidine to improve the endoscopic sinus surgical field.",
+        "Radiation strategy for early laryngeal carcinoma is directly compared (partial vs whole larynx) with implications for voice preservation and toxicity.",
+        "Practice-pattern and consensus pieces (6‑sinus balloon dilation utilization",
+        "pediatric vestibular testing) identify areas for deimplementation, quality improvement, and standardization.",
+        "A narrative review on deep learning highlights opportunities and pitfalls for clinical AI adoption in otolaryngology."
+      ]
+    },
+    {
+      "month": "2025-10",
+      "headline": "October 2025: Practice-defining trials, radiotherapy choices, and diagnostic signals across ENT subspecialties",
+      "paragraph": "This month's selection emphasizes studies and guidance likely to change clinical decision-making across pediatric sleep, head & neck oncology, thyroid surgery, otology, rhinology, and practice operations. Highlights include randomized trial-derived signals, international cohort evidence on radiotherapy outcomes, an updated appropriate-use guideline for early glottic cancer, and cross-cutting work on olfaction as a systemic biomarker and the use of generative AI in ENT. Together these papers inform perioperative risk stratification, modality selection in oncologic care, and emerging diagnostic and equity issues clinicians should incorporate into practice.",
+      "key_highlights": [
+        "Randomized-trial evidence on adenotonsillectomy effects in children with mild sleep-disordered breathing and cardiovascular signals",
+        "Multicenter data clarifying tumor control after radiotherapy for actively growing vestibular schwannomas",
+        "Consensus Appropriate Use Criteria to guide treatment selection for early glottic cancer",
+        "Intraoperative PTH monitoring to stratify postthyroidectomy hypocalcemia risk and immediate management decisions",
+        "Age-stratified cancer risk after radioactive iodine for differentiated thyroid cancer—important for counseling and adjuvant decisions",
+        "Cross-disciplinary signals: olfaction as a predictor of coronary disease and a systematic appraisal of generative AI for ENT tasks"
+      ]
+    },
+    {
+      "month": "2025-09",
+      "headline": "September 2025: Practice-changing trials, diagnostic AI, and reporting guidance across head & neck subspecialties",
+      "paragraph": "This month’s selection emphasizes high-impact randomized trials, durable device outcomes, methodological guidance, and novel diagnostic tools likely to influence clinical decisions across otolaryngology. Key themes include de-escalation strategies in head & neck oncology, expanded therapeutic windows and trial interpretation, durable procedural relief for chronic rhinitis, pragmatic reporting standards for observational causal inference, and advances in imaging/AI for oropharyngeal cancer staging. Together these papers offer immediate practice relevance and guide future research priorities across subspecialties.",
+      "key_highlights": [
+        "Phase 3 NPC trial (toripalimab) suggests potential to omit concurrent cisplatin—implications for de‑escalation of toxic chemoradiation.",
+        "HOPE trial tests IV alteplase 4.5–24 h after stroke in salvageable tissue—important for perioperative and acute care decision-making.",
+        "TARGET reporting guidance fills a major gap for observational studies emulating randomized trials, improving causal inference transparency.",
+        "Three‑year randomized data confirm durable symptom relief with posterior nasal nerve radiofrequency for chronic rhinitis.",
+        "Randomized trials and feasibility RCTs address voice and facial surgery decisions (post-thyroid VFP steroids",
+        "laryngeal reinnervation vs thyroplasty).",
+        "Diagnostic advances: surgeon‑performed transoral ultrasound and an AI pipeline for imaging-based extranodal extension in HPV+ OPC may improve staging and treatment selection."
+      ]
+    }
+  ]
 }

@@ -20,3 +20,18 @@ Once the workflow finishes (and the results are committed or available on its ar
 3. Commit and push any regenerated files or open a pull request as usual.
 
 This flow ensures that missed months are ingested and downstream views stay in sync with the corrected harvest.
+
+## 3. Backfill monthly summaries and standout papers
+If a month has been harvested but still lacks curation:
+
+1. Ensure `OPENAI_API_KEY` is available in your shell.
+2. Run the curation backfill script for one or more months:
+   ```bash
+   python3 backfill_monthly_curation.py --months 2026-01 2026-02
+   ```
+3. Rebuild the site payload:
+   ```bash
+   python3 build_journal_club.py
+   ```
+
+By default the script only fills months that do not already have summaries or highlight flags. Use `--overwrite-summaries` and/or `--overwrite-highlights` if you want to regenerate existing curation.
