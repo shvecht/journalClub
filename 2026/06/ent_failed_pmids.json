@@ -1,0 +1,11 @@
+{
+  "target_month": "2026-06",
+  "failed_pmids": [],
+  "filtered_out_pmids": [
+    {
+      "pmid": "42267640",
+      "publication_date": "2026-Jul",
+      "publication_month": "2026-07"
+    }
+  ]
+}
